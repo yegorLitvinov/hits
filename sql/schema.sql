@@ -3,15 +3,18 @@
 --
 
 create table if not exists account (
-    domain          varchar(100)    unique      not null,
+    api_key         uuid            unique      not null,
+    domain          varchar(100)    not null,
     email           varchar(100)    not null,
     id              integer         unique      not null,
     is_active       boolean         default false   not null,
     is_superuser    boolean         not null,
-    password        varchar(1000)   not null
+    password        varchar(1000)   not null,
+    unique(email, domain)
 );
 ALTER TABLE account OWNER TO hits;
 CREATE INDEX account_id_index ON account USING btree (id);
+CREATE INDEX account_email_index ON account USING btree (email);
 
 CREATE SEQUENCE account_id_seq
     START WITH 1

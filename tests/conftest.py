@@ -1,10 +1,12 @@
-import os
 import asyncio
-import pytest
+import os
+
 import psycopg2
+import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from src.db import User, get_pool
+from src.account import User
+from src.db import get_pool
 from src.settings import DSN_KWARGS
 
 TEST_DBNAME = DSN_KWARGS['dbname'] + '_test'

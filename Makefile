@@ -14,3 +14,8 @@ reset-db: drop-db create-db migrate
 
 isort:
 	@isort -rc src
+
+flake:
+	@flake8 src test
+
+precommit: isort flake
