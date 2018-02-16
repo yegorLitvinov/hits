@@ -1,0 +1,21 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+Sanic = "*"
+asyncpg = "*"
+
+
+[dev-packages]
+
+"flake8" = "*"
+isort = "*"
+ipdb = "*"
+AoikLiveReload = "*"
+pytest = "*"
+pytest-asyncio = "*"
