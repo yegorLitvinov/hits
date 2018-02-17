@@ -1,22 +1,30 @@
 import pytest
+from asyncpg.exceptions import UndefinedColumnError
 
 from src.account import User
+from src.db import DoesNotExist, MultipleObjectsReturned
 
 pytestmark = pytest.mark.asyncio
 
 
 async def test_get_by_credentials(pool, user, admin):
-    assert await User.get_by_credentials(user.email, 'user') == user
-    assert await User.get_by_credentials('email@nonexist.com', 'user') is None
-    assert await User.get_by_credentials(user.email, 'user234') is None
-    assert await User.get_by_credentials(user.email, 'admin') is None
-
-    assert await User.get_by_credentials(admin.email, 'admin') == admin
-    assert await User.get_by_credentials('exii@test.com', 'admin') is None
-    assert await User.get_by_credentials(admin.email, 'user234') is None
-    assert await User.get_by_credentials(admin.email, 'user') is None
-
     assert user.api_key != admin.api_key
+
+    assert await User.get(email=user.email, password='user') == user
+    with pytest.raises(DoesNotExist):
+        assert await User.get(email='email@nonexist.com', password='user')
+    with pytest.raises(DoesNotExist):
+        await User.get(email=user.email, password='user234')
+    with pytest.raises(DoesNotExist):
+        await User.get(email=user.email, password='admin')
+
+    assert await User.get(email=admin.email, password='admin') == admin
+    with pytest.raises(DoesNotExist):
+        await User.get(email='exii@test.com', password='admin')
+    with pytest.raises(DoesNotExist):
+        await User.get(email=admin.email, password='user234')
+    with pytest.raises(DoesNotExist):
+        await User.get(email=admin.email, password='user')
 
 
 async def test_empty_db(pool):
@@ -25,11 +33,29 @@ async def test_empty_db(pool):
     assert len(users) == 0
 
 
-async def test_get_by_id(pool, user, admin):
-    assert await User.get_by_id(user.id) == user
+async def test_get_by_id(pool, user):
+    assert await User.get(id=user.id) == user
     with pytest.raises(TypeError) as error:
-        await User.get_by_id('dfdf')
+        await User.get(id='dfdf')
     assert 'an integer is required' in str(error)
-    assert await User.get_by_id(-1) is None
-    assert await User.get_by_id(0) is None
-    assert await User.get_by_id(user.id + 0.5) == user  # lol
+    with pytest.raises(DoesNotExist):
+        await User.get(id=-1)
+    with pytest.raises(DoesNotExist):
+        await User.get(id=0)
+    assert await User.get(id=user.id + 0.5) == user  # lol
+
+
+async def test_get_errors(pool, user, admin):
+    with pytest.raises(MultipleObjectsReturned):
+        await User.get(is_active=True)
+    with pytest.raises(UndefinedColumnError):
+        await User.get(wrong_col=True)
+
+
+async def test_filter(pool, user, admin):
+    assert await User.filter(is_active=True) == [user, admin]
+    assert await User.filter(is_active=False) == []
+    assert await User.filter(is_superuser=True) == [admin]
+    assert await User.filter(is_superuser=False) == [user]
+    assert await User.filter() == [user, admin]
+    assert await User.all() == [user, admin]
