@@ -1,3 +1,3 @@
-create user hits with encrypted password 'password';
-create database hits owner hits;
-alter user hits with createdb;
+create user metric with encrypted password 'password';
+create database metric owner metric;
+alter user metric with createdb;

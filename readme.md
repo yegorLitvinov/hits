@@ -1,1 +1,1 @@
-## Simple asyncio hits counter
+## Simple asyncio hits and visits counter

@@ -7,18 +7,6 @@ from .settings import DSN_KWARGS
 _pool = None
 
 
-class DBError(Exception):
-    pass
-
-
-class DoesNotExist(DBError):
-    pass
-
-
-class MultipleObjectsReturned(DBError):
-    pass
-
-
 async def get_pool(loop=None):
     global _pool
     if _pool is None or loop:
@@ -31,6 +19,18 @@ async def get_pool(loop=None):
             max_size=10
         )
     return _pool
+
+
+class DBError(Exception):
+    pass
+
+
+class DoesNotExist(DBError):
+    pass
+
+
+class MultipleObjectsReturned(DBError):
+    pass
 
 
 class FilterMixin:

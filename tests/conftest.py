@@ -1,13 +1,14 @@
-import asyncio
 import os
 
 import psycopg2
 import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from sanic import Sanic
 
+from src.views import add_routes
 from src.account import User
-from src.db import get_pool
 from src.settings import DSN_KWARGS
+from src.db import get_pool
 
 TEST_DBNAME = DSN_KWARGS['dbname'] + '_test'
 DSN_KWARGS['dbname'] = TEST_DBNAME
@@ -21,6 +22,14 @@ def get_dsn(**kwargs):
     dsn_kwargs = DSN_KWARGS.copy()
     dsn_kwargs.update(kwargs)
     return dsn_template.format(**dsn_kwargs)
+
+
+async def prepare(loop, user=None, admin=None):
+    await get_pool(loop)
+    if user:
+        await user.save()
+    if admin:
+        await admin.save()
 
 
 @pytest.fixture(scope='session')
@@ -37,15 +46,15 @@ def db(sql_dir):
     )
     root_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     root_cursor = root_conn.cursor()
-    root_cursor.execute(f'create database {TEST_DBNAME} owner hits')
+    root_cursor.execute(f'create database {TEST_DBNAME} owner {DSN_KWARGS["user"]}')
 
-    hits_conn = psycopg2.connect(get_dsn())
-    hits_cursor = hits_conn.cursor()
+    metric_conn = psycopg2.connect(get_dsn())
+    metric_cursor = metric_conn.cursor()
 
     schema = open(os.path.join(sql_dir, 'schema.sql')).read()
     try:
-        hits_cursor.execute(schema)
-        hits_conn.commit()
+        metric_cursor.execute(schema)
+        metric_conn.commit()
         yield
     finally:
         root_cursor.execute(f'REVOKE CONNECT ON DATABASE {TEST_DBNAME} FROM public')
@@ -55,39 +64,39 @@ def db(sql_dir):
             f'where datname=\'{TEST_DBNAME}\'',
         )
         root_conn.commit()
-        # hits_cursor.close()
-        # hits_conn.close()
         root_cursor.execute(f'drop database {TEST_DBNAME}')
         root_conn.commit()
         root_cursor.close()
         root_conn.close()
 
 
-@pytest.yield_fixture(scope='session')
-def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+@pytest.fixture
+def execute(db):
+    conn = psycopg2.connect(get_dsn())
+    cursor = conn.cursor()
 
+    def inner(query, *args):
+        cursor.execute(query, *args)
+        conn.commit()
+        try:
+            return cursor.fetchall()
+        except psycopg2.ProgrammingError:
+            pass
+    yield inner
 
-@pytest.fixture(scope='session')
-async def pool(event_loop, db):
-    p = await get_pool(event_loop)
-    yield p
-    await p.close()
+    cursor.close()
+    conn.close()
 
 
 # FIXME: db implicitly used in all tests
 @pytest.fixture(autouse=True)
-async def cleanup_db(pool):
-    async with pool.acquire() as conn:
-        await conn.execute('delete from account')
-        await conn.execute('delete from hit')
+def cleanup_db(execute):
+    execute('delete from account')
+    execute('delete from visitor')
 
 
 @pytest.fixture
-async def user():
+def user(db):
     u = User(
         email='user@example.com',
         domain='example.com',
@@ -95,12 +104,11 @@ async def user():
         is_superuser=False
     )
     u.set_password('user')
-    await u.save()
     return u
 
 
 @pytest.fixture
-async def admin():
+def admin(db):
     u = User(
         email='admin@example.com',
         domain='superuser.com',
@@ -108,5 +116,16 @@ async def admin():
         is_superuser=True
     )
     u.set_password('admin')
-    await u.save()
     return u
+
+
+@pytest.fixture
+def app(loop):
+    app = Sanic()
+    add_routes(app)
+    return app
+
+
+@pytest.fixture
+def client(app, loop, test_client):
+    return loop.run_until_complete(test_client(app))

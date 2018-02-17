@@ -2,13 +2,13 @@ run:
 	python develop.py
 
 drop-db:
-	psql -c 'drop database hits;'
+	psql -c 'drop database metric;'
 
 create-db:
 	psql < sql/init.sql
 
 migrate:
-	psql -d hits < sql/schema.sql
+	psql -d metric < sql/schema.sql
 
 reset-db: drop-db create-db migrate
 

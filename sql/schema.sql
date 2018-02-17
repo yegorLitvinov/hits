@@ -12,9 +12,10 @@ create table if not exists account (
     password        varchar(1000)   not null,
     unique(email, domain)
 );
-ALTER TABLE account OWNER TO hits;
-CREATE INDEX account_id_index ON account USING btree (id);
-CREATE INDEX account_email_index ON account USING btree (email);
+ALTER TABLE account OWNER TO metric;
+CREATE INDEX account__id__index ON account USING btree (id);
+CREATE INDEX account__email__index ON account USING btree (email);
+CREATE INDEX account__domain__api_key__index ON account USING btree (domain, api_key);
 
 CREATE SEQUENCE account_id_seq
     START WITH 1
@@ -22,34 +23,34 @@ CREATE SEQUENCE account_id_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-ALTER TABLE account_id_seq OWNER TO hits;
+ALTER TABLE account_id_seq OWNER TO metric;
 ALTER SEQUENCE account_id_seq OWNED BY account.id;
 ALTER TABLE ONLY account ALTER COLUMN id SET DEFAULT nextval('account_id_seq'::regclass);
 
 --
--- Hit
+-- Visitor
 --
 
-create table hit (
+create table visitor (
     account_id  integer         not null,
     date        date            not null,
     endpoint    varchar(1000)   not null,
     id          integer         not null,
-    ip          varchar(20)     not null,
-    visits      integer         not null    check(visits > 0),
-    unique(ip, date, account_id, endpoint)
+    cookie     varchar(40)     not null,
+    hits       integer         not null    check(hits > 0),
+    unique(cookie, date, account_id, endpoint)
 );
-ALTER TABLE hit OWNER TO hits;
-CREATE INDEX hit_id_index ON hit USING btree (account_id, date, endpoint);
-ALTER TABLE ONLY hit
-    ADD CONSTRAINT hit_account_id_fk_account FOREIGN KEY (account_id) REFERENCES account(id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE visitor OWNER TO metric;
+CREATE INDEX visitor__id__index ON visitor USING btree (account_id, date, endpoint);
+ALTER TABLE ONLY visitor
+    ADD CONSTRAINT visitor_account_id_fk_account FOREIGN KEY (account_id) REFERENCES account(id) DEFERRABLE INITIALLY DEFERRED;
 
-CREATE SEQUENCE hit_id_seq
+CREATE SEQUENCE visitor_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-ALTER TABLE hit_id_seq OWNER TO hits;
-ALTER SEQUENCE hit_id_seq OWNED BY hit.id;
-ALTER TABLE ONLY hit ALTER COLUMN id SET DEFAULT nextval('hit_id_seq'::regclass);
+ALTER TABLE visitor_id_seq OWNER TO metric;
+ALTER SEQUENCE visitor_id_seq OWNED BY visitor.id;
+ALTER TABLE ONLY visitor ALTER COLUMN id SET DEFAULT nextval('visitor_id_seq'::regclass);

@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from .db import get_pool, FilterMixin
+from .db import FilterMixin, get_pool
 
 
 def encrypt_password(password):

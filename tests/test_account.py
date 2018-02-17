@@ -3,11 +3,11 @@ from asyncpg.exceptions import UndefinedColumnError
 
 from src.account import User
 from src.db import DoesNotExist, MultipleObjectsReturned
+from .conftest import prepare
 
-pytestmark = pytest.mark.asyncio
 
-
-async def test_get_by_credentials(pool, user, admin):
+async def test_get_by_credentials(db, loop, user, admin):
+    await prepare(loop, user, admin)
     assert user.api_key != admin.api_key
 
     assert await User.get(email=user.email, password='user') == user
@@ -27,13 +27,13 @@ async def test_get_by_credentials(pool, user, admin):
         await User.get(email=admin.email, password='user')
 
 
-async def test_empty_db(pool):
-    async with pool.acquire() as conn:
-        users = await conn.fetch('select * from account')
+def test_empty_db(execute, loop):
+    users = execute('select * from account')
     assert len(users) == 0
 
 
-async def test_get_by_id(pool, user):
+async def test_get_by_id(db, loop, user):
+    await prepare(loop, user)
     assert await User.get(id=user.id) == user
     with pytest.raises(TypeError) as error:
         await User.get(id='dfdf')
@@ -45,14 +45,16 @@ async def test_get_by_id(pool, user):
     assert await User.get(id=user.id + 0.5) == user  # lol
 
 
-async def test_get_errors(pool, user, admin):
+async def test_get_errors(db, loop, user, admin):
+    await prepare(loop, user, admin)
     with pytest.raises(MultipleObjectsReturned):
         await User.get(is_active=True)
     with pytest.raises(UndefinedColumnError):
         await User.get(wrong_col=True)
 
 
-async def test_filter(pool, user, admin):
+async def test_filter(db, loop, user, admin):
+    await prepare(loop, user, admin)
     assert await User.filter(is_active=True) == [user, admin]
     assert await User.filter(is_active=False) == []
     assert await User.filter(is_superuser=True) == [admin]
