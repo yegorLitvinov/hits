@@ -34,14 +34,14 @@ ALTER TABLE ONLY account ALTER COLUMN id SET DEFAULT nextval('account_id_seq'::r
 create table visitor (
     account_id  integer         not null,
     date        date            not null,
-    endpoint    varchar(1000)   not null,
+    path        varchar(1000)   not null,
     id          integer         not null,
-    cookie     varchar(40)     not null,
-    hits       integer         not null    check(hits > 0),
-    unique(cookie, date, account_id, endpoint)
+    cookie      uuid            not null,
+    hits        integer         default 1   not null    check(hits > 0),
+    unique(cookie, date, account_id, path)
 );
 ALTER TABLE visitor OWNER TO metric;
-CREATE INDEX visitor__id__index ON visitor USING btree (account_id, date, endpoint);
+CREATE INDEX visitor__id__index ON visitor USING btree (account_id, date, path);
 ALTER TABLE ONLY visitor
     ADD CONSTRAINT visitor_account_id_fk_account FOREIGN KEY (account_id) REFERENCES account(id) DEFERRABLE INITIALLY DEFERRED;
 

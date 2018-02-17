@@ -24,12 +24,13 @@ def get_dsn(**kwargs):
     return dsn_template.format(**dsn_kwargs)
 
 
-async def prepare(loop, user=None, admin=None):
-    await get_pool(loop)
+async def prepare_pool(loop, user=None, admin=None):
+    pool = await get_pool(loop)
     if user:
         await user.save()
     if admin:
         await admin.save()
+    return pool
 
 
 @pytest.fixture(scope='session')
@@ -91,15 +92,15 @@ def execute(db):
 # FIXME: db implicitly used in all tests
 @pytest.fixture(autouse=True)
 def cleanup_db(execute):
-    execute('delete from account')
     execute('delete from visitor')
+    execute('delete from account')
 
 
 @pytest.fixture
 def user(db):
     u = User(
         email='user@example.com',
-        domain='example.com',
+        domain='https://example.com',
         is_active=True,
         is_superuser=False
     )
@@ -111,7 +112,7 @@ def user(db):
 def admin(db):
     u = User(
         email='admin@example.com',
-        domain='superuser.com',
+        domain='',
         is_active=True,
         is_superuser=True
     )
