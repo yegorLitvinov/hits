@@ -7,15 +7,18 @@ name = "pypi"
 
 [packages]
 
-Sanic = "*"
+sanic = "*"
 asyncpg = "*"
+ipython = "*"
 
 
 [dev-packages]
 
 "flake8" = "*"
 isort = "*"
-AoikLiveReload = "*"
+aoiklivereload = "*"
 pytest = "*"
 pdbpp = "*"
 pytest-sanic = "*"
+fabricio = "*"
+"psycopg2-binary" = "*"

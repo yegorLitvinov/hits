@@ -5,13 +5,13 @@ import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sanic import Sanic
 
-from src.views import add_routes
-from src.account import User
-from src.settings import DSN_KWARGS
-from src.db import get_pool
+from app.views import add_routes
+from app.account import User
+from app.conf import settings
+from app.db import get_pool
 
-TEST_DBNAME = DSN_KWARGS['dbname'] + '_test'
-DSN_KWARGS['dbname'] = TEST_DBNAME
+TEST_DBNAME = settings.DSN_KWARGS['dbname'] + '_test'
+settings.DSN_KWARGS['dbname'] = TEST_DBNAME
 
 
 def pytest_addoption(parser):
@@ -33,7 +33,7 @@ def get_dsn(**kwargs):
         'dbname={dbname} user={user} password={password} '
         'host={host} port={port}'
     )
-    dsn_kwargs = DSN_KWARGS.copy()
+    dsn_kwargs = settings.DSN_KWARGS.copy()
     dsn_kwargs.update(kwargs)
     return dsn_template.format(**dsn_kwargs)
 
@@ -67,10 +67,10 @@ def db(sql_dir, reuse_db):
     if not reuse_db:
         if exists:
             root_cursor.execute(f'drop database {TEST_DBNAME}')
-        root_cursor.execute(f'create database {TEST_DBNAME} owner {DSN_KWARGS["user"]}')
+        root_cursor.execute(f'create database {TEST_DBNAME} owner {settings.DSN_KWARGS["user"]}')
         root_conn.commit()
     elif not exists:
-        root_cursor.execute(f'create database {TEST_DBNAME} owner {DSN_KWARGS["user"]}')
+        root_cursor.execute(f'create database {TEST_DBNAME} owner {settings.DSN_KWARGS["user"]}')
 
     metric_conn = psycopg2.connect(get_dsn())
     metric_cursor = metric_conn.cursor()

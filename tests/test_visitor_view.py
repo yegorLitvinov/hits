@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from src.settings import COOKIE_NAME
+from app.conf import settings
 
 from .conftest import prepare_pool
 
@@ -22,16 +22,33 @@ async def test_wrong_method(db, loop, client):
 
 async def test_wrong_credentials(db, loop, user, client):
     await prepare_pool(loop, user)
-    response = await client.get('/visit/somekey')
+    response = await client.get('/visit/somekey', headers={
+        'Referer': 'https://example.com/about/',
+    })
     assert response.status == 404
-    response = await client.get('/visit/b1df43e0-465b-41a2-942c-c46f274cd68f/')
+    response = await client.get(
+        '/visit/b1df43e0-465b-41a2-942c-c46f274cd68f/',
+        headers={
+            'Referer': 'https://example.com/about/',
+        }
+    )
     assert response.status == 404
+
+
+async def test_empty_referer(db, loop, user, client):
+    user.is_active = False
+    await prepare_pool(loop, user)
+    response = await client.get(f'/visit/{user.api_key}/')
+    assert response.status == 400
+    assert await response.text() == 'Empty referer domain'
 
 
 async def test_inactive_user(db, loop, user, client):
     user.is_active = False
     await prepare_pool(loop, user)
-    response = await client.get(f'/visit/{user.api_key}/')
+    response = await client.get(f'/visit/{user.api_key}/', headers={
+        'Referer': 'https://example.com/about/',
+    })
     assert response.status == 404
 
 
@@ -40,7 +57,7 @@ async def test_2hits(db, loop, client, user):
     response = await client.get(f'/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',
     })
-    cookie = response.cookies[COOKIE_NAME]
+    cookie = response.cookies[settings.COOKIE_NAME]
     response = await client.get(f'/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',
     })

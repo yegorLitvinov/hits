@@ -2,7 +2,7 @@ import asyncio
 
 import asyncpg
 
-from .settings import DSN_KWARGS
+from .conf import settings
 
 _pool = None
 
@@ -10,7 +10,7 @@ _pool = None
 async def get_pool(loop=None):
     global _pool
     if _pool is None or loop:
-        dsn_kwargs = DSN_KWARGS.copy()
+        dsn_kwargs = settings.DSN_KWARGS.copy()
         dsn_kwargs['database'] = dsn_kwargs.pop('dbname')
         _pool = await asyncpg.create_pool(
             **dsn_kwargs,

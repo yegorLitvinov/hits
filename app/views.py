@@ -5,21 +5,21 @@ from sanic.response import text
 from sanic.views import HTTPMethodView
 
 from .account import User
+from .conf import settings
 from .db import DoesNotExist
-from .settings import COOKIE_MAX_AGE, COOKIE_NAME
 from .visitor import increment_counter
 
 
 class VisitView(HTTPMethodView):
     @staticmethod
     def _process_cookie(request, response):
-        cookie = request.cookies.get(COOKIE_NAME, '')
+        cookie = request.cookies.get(settings.COOKIE_NAME, '')
         try:
             cookie = str(UUID(cookie))
         except ValueError:
             cookie = str(uuid4())
-            response.cookies[COOKIE_NAME] = cookie
-            response.cookies[COOKIE_NAME]['max-age'] = COOKIE_MAX_AGE
+            response.cookies[settings.COOKIE_NAME] = cookie
+            response.cookies[settings.COOKIE_NAME]['max-age'] = settings.COOKIE_MAX_AGE
         return cookie
 
     @staticmethod
@@ -27,7 +27,8 @@ class VisitView(HTTPMethodView):
         try:
             return await User.get(domain=domain, api_key=api_key, is_active=True)
         except (DoesNotExist, ValueError) as error:
-            await asyncio.sleep(1)  # bruteforce protection :)
+            if not settings.DEBUG:
+                await asyncio.sleep(1)  # bruteforce protection :)
 
     @staticmethod
     def _parse_referer(request):
@@ -41,14 +42,13 @@ class VisitView(HTTPMethodView):
         return domain, '/' + path
 
     async def get(self, request, api_key):
-        not_found = text('Account not found', status=404)
         domain, path = VisitView._parse_referer(request)
         print(domain, path)
         if not domain:
-            return not_found
+            return text('Empty referer domain', status=400)
         user = await VisitView._get_user(domain, api_key)
         if not user:
-            return not_found
+            return text('Account not found', status=404)
 
         response = text('')
         cookie = VisitView._process_cookie(request, response)

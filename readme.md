@@ -4,8 +4,14 @@
 Place the following markup at your page
 ```html
 <img
-    src="http://futuredomain.com/visit/b1df43e0-465b-41a2-942c-c46f274cd68f/"
+    src="http://metr.ddns.net/visit/{your_api_key}/"
     alt="metriccounter"
     style="display: none;"
 >
+```
+
+### Docker
+```bash
+docker build --tag metric:latest .
+docker run -d -p8181:8181 --volume=`pwd`:/app --name metric --rm metric:latest
 ```

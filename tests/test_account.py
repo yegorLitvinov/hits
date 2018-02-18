@@ -1,8 +1,8 @@
 import pytest
 from asyncpg.exceptions import UndefinedColumnError
 
-from src.account import User
-from src.db import DoesNotExist, MultipleObjectsReturned
+from app.account import User
+from app.db import DoesNotExist, MultipleObjectsReturned
 from .conftest import prepare_pool
 
 
