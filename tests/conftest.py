@@ -14,6 +14,20 @@ TEST_DBNAME = DSN_KWARGS['dbname'] + '_test'
 DSN_KWARGS['dbname'] = TEST_DBNAME
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--reuse-db",
+        action="store_true",
+        default=False,
+        help="Do not delete database after run."
+    )
+
+
+@pytest.fixture(scope='session')
+def reuse_db(request):
+    return request.config.getoption("--reuse-db")
+
+
 def get_dsn(**kwargs):
     dsn_template = (
         'dbname={dbname} user={user} password={password} '
@@ -41,21 +55,31 @@ def sql_dir():
 
 
 @pytest.fixture(scope='session')
-def db(sql_dir):
+def db(sql_dir, reuse_db):
     root_conn = psycopg2.connect(
         get_dsn(dbname='postgres')
     )
     root_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     root_cursor = root_conn.cursor()
-    root_cursor.execute(f'create database {TEST_DBNAME} owner {DSN_KWARGS["user"]}')
+
+    root_cursor.execute(f'SELECT 1 FROM pg_database WHERE datname = \'{TEST_DBNAME}\'')
+    exists = root_cursor.fetchone()
+    if not reuse_db:
+        if exists:
+            root_cursor.execute(f'drop database {TEST_DBNAME}')
+        root_cursor.execute(f'create database {TEST_DBNAME} owner {DSN_KWARGS["user"]}')
+        root_conn.commit()
+    elif not exists:
+        root_cursor.execute(f'create database {TEST_DBNAME} owner {DSN_KWARGS["user"]}')
 
     metric_conn = psycopg2.connect(get_dsn())
     metric_cursor = metric_conn.cursor()
 
     schema = open(os.path.join(sql_dir, 'schema.sql')).read()
     try:
-        metric_cursor.execute(schema)
-        metric_conn.commit()
+        if not reuse_db or not exists:
+            metric_cursor.execute(schema)
+            metric_conn.commit()
         yield
     finally:
         root_cursor.execute(f'REVOKE CONNECT ON DATABASE {TEST_DBNAME} FROM public')
@@ -65,8 +89,9 @@ def db(sql_dir):
             f'where datname=\'{TEST_DBNAME}\'',
         )
         root_conn.commit()
-        root_cursor.execute(f'drop database {TEST_DBNAME}')
-        root_conn.commit()
+        if not reuse_db:
+            root_cursor.execute(f'drop database {TEST_DBNAME}')
+            root_conn.commit()
         root_cursor.close()
         root_conn.close()
 
