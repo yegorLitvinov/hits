@@ -125,7 +125,7 @@ def cleanup_db(execute):
 def user(db):
     u = User(
         email='user@example.com',
-        domain='https://example.com',
+        domain='example.com',
         is_active=True,
         is_superuser=False
     )

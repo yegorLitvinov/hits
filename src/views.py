@@ -11,7 +11,8 @@ from .visitor import increment_counter
 
 
 class VisitView(HTTPMethodView):
-    def _process_cookie(self, request, response):
+    @staticmethod
+    def _process_cookie(request, response):
         cookie = request.cookies.get(COOKIE_NAME, '')
         try:
             cookie = str(UUID(cookie))
@@ -21,35 +22,39 @@ class VisitView(HTTPMethodView):
             response.cookies[COOKIE_NAME]['max-age'] = COOKIE_MAX_AGE
         return cookie
 
-    async def _get_user(self, request, api_key):
-        origin = request.headers.get('Origin')
-        if not origin:
-            return None
+    @staticmethod
+    async def _get_user(domain, api_key):
         try:
-            return await User.get(domain=origin, api_key=api_key, is_active=True)
+            return await User.get(domain=domain, api_key=api_key, is_active=True)
         except (DoesNotExist, ValueError) as error:
             await asyncio.sleep(1)  # bruteforce protection :)
 
-    def _get_referer_path(self, request):
-        "Return referer path, e.g. /about/ or empty string."
+    @staticmethod
+    def _parse_referer(request):
+        "Return (domain, path)."
         referer = request.headers.get('Referer', '')
         try:
             schema, url = referer.split('://', 1)
             domain, path = url.split('/', 1)
         except ValueError:
-            return ''
-        return '/' + path
+            return '', ''
+        return domain, '/' + path
 
-    async def post(self, request, api_key):
-        user = await self._get_user(request, api_key)
+    async def get(self, request, api_key):
+        not_found = text('Account not found', status=404)
+        domain, path = VisitView._parse_referer(request)
+        print(domain, path)
+        if not domain:
+            return not_found
+        user = await VisitView._get_user(domain, api_key)
         if not user:
-            return text('Account not found', status=404)
-        response = text('', )
-        cookie = self._process_cookie(request, response)
-        path = self._get_referer_path(request)
+            return not_found
+
+        response = text('')
+        cookie = VisitView._process_cookie(request, response)
         await increment_counter(user.id, cookie, path)
         return response
 
 
 def add_routes(app):
-    app.add_route(VisitView.as_view(), '/visit/<api_key>', methods=['POST'])
+    app.add_route(VisitView.as_view(), '/visit/<api_key>')

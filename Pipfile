@@ -15,7 +15,6 @@ asyncpg = "*"
 
 "flake8" = "*"
 isort = "*"
-ipdb = "*"
 AoikLiveReload = "*"
 pytest = "*"
 pdbpp = "*"
