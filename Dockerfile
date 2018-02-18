@@ -1,6 +1,6 @@
 FROM python:3.6-alpine
 
-env PROJECT_DIR /app
+env PROJECT_DIR /metric
 env USER metric
 
 RUN mkdir -p $PROJECT_DIR
@@ -14,11 +14,8 @@ RUN apk add --update build-base
 USER $USER
 ADD requirements.txt .
 RUN pip install --user -r requirements.txt
-ADD app/ $PROJECT_DIR
+ADD app $PROJECT_DIR/app
 
 EXPOSE 8181
 
-ENTRYPOINT ["/bin/sh"]
-# ENTRYPOINT ["python -m app"]
-# CMD ["ls", "-lah"]
-# CMD ["python3", "-m app"]
+CMD PYTHONPATH=`pwd` SETTINGS_MODULE=app.conf.prod python3 -m app

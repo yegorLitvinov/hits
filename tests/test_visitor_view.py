@@ -40,7 +40,7 @@ async def test_empty_referer(db, loop, user, client):
     await prepare_pool(loop, user)
     response = await client.get(f'/visit/{user.api_key}/')
     assert response.status == 400
-    assert await response.text() == 'Empty referer domain'
+    assert await response.text() == 'Referer\'s domain is empty'
 
 
 async def test_inactive_user(db, loop, user, client):

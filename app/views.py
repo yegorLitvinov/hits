@@ -45,7 +45,7 @@ class VisitView(HTTPMethodView):
         domain, path = VisitView._parse_referer(request)
         print(domain, path)
         if not domain:
-            return text('Empty referer domain', status=400)
+            return text('Referer\'s domain is empty', status=400)
         user = await VisitView._get_user(domain, api_key)
         if not user:
             return text('Account not found', status=404)

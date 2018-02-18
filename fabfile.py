@@ -45,13 +45,51 @@ def install_certificates():
     api.run(f'certbot --nginx -d {domain}')
 
 
-metric_web = tasks.DockerTasks(
+@api.hosts(f'root@{host}')
+@api.task
+def copy_nginx():
+    api.put('etc/metric_nginx.conf', '/etc/nginx/sites-enabled/metric.conf')
+    api.run('nginx -t')
+    api.run('service nginx reload')
+
+
+@api.hosts(f'root@{host}')
+@api.task
+def create_network():
+    api.run(
+        'docker network create --subnet 172.19.0.0/24 --gateway 172.19.0.1 metric',
+    )
+
+
+metric_app = tasks.ImageBuildDockerTasks(
     service=docker.Container(
-        name='metric_web',
-        image='python:alpine',
-        options={
-            'publish': '8181:8181',
-        },
+        name='metric_app',
+        image='metric_app',
+        options=dict(
+            publish='8181:8181',
+            network='metric',
+            ip='172.19.0.2'
+        ),
     ),
-    hosts=[f'{user}@{host}']
+    ssh_tunnel='5000:5000',
+    registry='localhost:5000',
+    hosts=[f'{user}@{host}'],
+    build_path='.',
+)
+
+
+metric_postgres = tasks.ImageBuildDockerTasks(
+    service=docker.Container(
+        name='metric_postgres',
+        image='metric_postgres',
+        options=dict(
+            network='metric',
+            ip='172.19.0.3',
+            volume='pgdata:/var/lib/postgresql/data',
+        )
+    ),
+    registry='localhost:5000',
+    ssh_tunnel='5000:5000',
+    hosts=[f'{user}@{host}'],
+    build_path='sql',
 )
