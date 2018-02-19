@@ -5,6 +5,9 @@ python:
 services:
   - postgresql
 
+addons:
+  postgresql: "9.6"
+
 install:
   - pip3.6 install pipenv
   - pipenv install --dev
