@@ -8,13 +8,13 @@ RUN adduser -u 1010 -h /home/$USER -D -s /bin/sh $USER
 WORKDIR $PROJECT_DIR
 
 USER root
-RUN pip install pipenv
 RUN apk add --update build-base
+RUN rm -rf /var/cache/apk/*
 
 USER $USER
-ADD requirements.txt .
-RUN pip install --user -r requirements.txt
-ADD app $PROJECT_DIR/app
+ADD requirements/prod.txt .
+RUN pip install --user -r prod.txt
+ADD app ./app
 
 EXPOSE 8181
 

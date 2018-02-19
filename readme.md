@@ -7,13 +7,13 @@ Place the following markup at your page
 ```html
 <img
     src="http://metr.ddns.net/visit/{your_api_key}/"
-    alt="metriccounter"
+    alt="Hits counter"
     style="display: none;"
 >
 ```
 
-### Docker
+### Deploy
 ```bash
-docker build --tag metric:latest .
-docker run -d -p8181:8181 --volume=`pwd`:/app --name metric --rm metric:latest
+fab metric_pg  # checkout dockerfile
+fab metric_app
 ```

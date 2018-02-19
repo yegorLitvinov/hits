@@ -78,14 +78,14 @@ metric_app = tasks.ImageBuildDockerTasks(
 )
 
 
-metric_postgres = tasks.ImageBuildDockerTasks(
+metric_pg = tasks.ImageBuildDockerTasks(
     service=docker.Container(
-        name='metric_postgres',
-        image='metric_postgres',
+        name='metric_pg',
+        image='metric_pg',
         options=dict(
             network='metric',
             ip='172.19.0.3',
-            volume='pgdata:/var/lib/postgresql/data',
+            volume=f'/home/{user}/pgdata:/var/lib/postgresql/data',
         )
     ),
     registry='localhost:5000',

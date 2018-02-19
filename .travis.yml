@@ -9,8 +9,7 @@ addons:
   postgresql: "9.6"
 
 install:
-  - pip3.6 install pipenv
-  - pipenv install --dev
+  - pip install requirements/dev.txt
 
 before_script:
   - 'psql -U postgres < sql/init_ci.sql'
