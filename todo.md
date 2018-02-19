@@ -2,6 +2,9 @@
 - [x] Comare wiht uvloop (already used by sanic)
 - [x] pytest --reuse-db option
 - [x] fabricio
+- [x] postgres backup, volume and create schema script
+- [x] remove downloaded packages from images
 - [ ] loading tests
-- [ ] postgres backup, volume and create schema script
-- [ ] remove downloaded packages from images
+
+## Frontend
+- [ ] admin
