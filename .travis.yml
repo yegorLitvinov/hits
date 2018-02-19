@@ -9,4 +9,4 @@ install:
   - pip3.6 install pipenv
   - pipenv install --dev
 
-script: PYTHONPATH=`pwd` pytest
+script: PYTHONPATH=`pwd` SETTINGS_MODULE=app.conf.ci pytest
