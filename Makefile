@@ -23,7 +23,7 @@ isort:
 flake:
 	@flake8 app test
 
-precommit: isort flake
+precommit: flake isort
 
 cleanup:
 	find . -name \*.pyc | xargs rm -fv
@@ -41,3 +41,6 @@ create-requirements:
 backup:
 	mkdir -p backup/db
 	rsync -r -e ssh $(HOST):$(PROJECT_SRC)/pgdata $(DST)/backup/db/
+
+test-cov:
+	py.test --cov=app --cov-config .coveragerc --cov-report html:htmlcov

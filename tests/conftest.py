@@ -4,11 +4,13 @@ import psycopg2
 import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sanic import Sanic
+from redis import StrictRedis
 
 from app.views import add_routes
 from app.account import User
 from app.conf import settings
-from app.db import get_pool
+from app.db import get_db_pool
+from app.session import get_redis_pool
 
 TEST_DBNAME = settings.DSN_KWARGS['dbname'] + '_test'
 settings.DSN_KWARGS['dbname'] = TEST_DBNAME
@@ -38,13 +40,13 @@ def get_dsn(**kwargs):
     return dsn_template.format(**dsn_kwargs)
 
 
-async def prepare_pool(loop, user=None, admin=None):
-    pool = await get_pool(loop)
+async def prepare(loop, user=None, admin=None):
+    await get_db_pool(loop)
+    await get_redis_pool(loop)
     if user:
         await user.save()
     if admin:
         await admin.save()
-    return pool
 
 
 @pytest.fixture(scope='session')
@@ -114,11 +116,18 @@ def execute(db):
     conn.close()
 
 
+@pytest.fixture(scope='session')
+def redis():
+    r = StrictRedis(**settings.REDIS_KWARGS)
+    yield r
+
+
 # FIXME: db implicitly used in all tests
 @pytest.fixture(autouse=True)
-def cleanup_db(execute):
+def cleanup_db(execute, redis):
     execute('delete from visitor')
     execute('delete from account')
+    redis.flushdb()
 
 
 @pytest.fixture

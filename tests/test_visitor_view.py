@@ -2,8 +2,9 @@ from datetime import datetime
 from uuid import UUID
 
 from app.conf import settings
+from app.db import get_db_pool
 
-from .conftest import prepare_pool
+from .conftest import prepare
 
 
 async def test_wrong_url(db, loop, client):
@@ -21,7 +22,7 @@ async def test_wrong_method(db, loop, client):
 
 
 async def test_wrong_credentials(db, loop, user, client):
-    await prepare_pool(loop, user)
+    await prepare(loop, user)
     response = await client.get('/visit/somekey', headers={
         'Referer': 'https://example.com/about/',
     })
@@ -37,7 +38,7 @@ async def test_wrong_credentials(db, loop, user, client):
 
 async def test_empty_referer(db, loop, user, client):
     user.is_active = False
-    await prepare_pool(loop, user)
+    await prepare(loop, user)
     response = await client.get(f'/visit/{user.api_key}/')
     assert response.status == 400
     assert await response.text() == 'Referer\'s domain is empty'
@@ -45,7 +46,7 @@ async def test_empty_referer(db, loop, user, client):
 
 async def test_inactive_user(db, loop, user, client):
     user.is_active = False
-    await prepare_pool(loop, user)
+    await prepare(loop, user)
     response = await client.get(f'/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',
     })
@@ -53,17 +54,19 @@ async def test_inactive_user(db, loop, user, client):
 
 
 async def test_2hits(db, loop, client, user):
-    pool = await prepare_pool(loop, user)
+    await prepare(loop, user)
     response = await client.get(f'/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',
     })
-    cookie = response.cookies[settings.COOKIE_NAME]
-    response = await client.get(f'/visit/{user.api_key}/', headers={
-        'Referer': 'https://example.com/about/',
-    })
+    cookie = response.cookies[settings.VISITOR_COOKIE_NAME]
     assert cookie
     assert cookie.value == str(UUID(cookie.value))
+    response = await client.get(f'/visit/{user.api_key}/', headers={
+        'Referer': 'https://example.com/about/',
+    })
+    assert response.cookies.get(settings.VISITOR_COOKIE_NAME) is None
 
+    pool = await get_db_pool()
     async with pool.acquire() as conn:
         visitors = await conn.fetch('select * from visitor')
     assert len(visitors) == 1

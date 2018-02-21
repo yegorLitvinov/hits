@@ -6,25 +6,27 @@ import pytest
 from asyncpg.exceptions import ForeignKeyViolationError
 
 from app.visitor import increment_counter
+from app.db import get_db_pool
 
-from .conftest import prepare_pool
+from .conftest import prepare
 
 
 async def test_increment_error_no_user(db, loop):
-    await prepare_pool(loop)
+    await prepare(loop)
     cookie = str(uuid4())
     with pytest.raises(ForeignKeyViolationError):
         await increment_counter(0, cookie, '/')
 
 
 async def test_increment_error_wrong_uuid(db, user, loop):
-    await prepare_pool(loop, user)
+    await prepare(loop, user)
     with pytest.raises(ValueError):
         await increment_counter(user.id, '', '/')
 
 
 async def test_increment_success_increase(db, loop, user, admin):
-    pool = await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
+    pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
 
@@ -48,7 +50,8 @@ async def test_increment_success_increase(db, loop, user, admin):
 
 
 async def test_increment_success_another_path(db, loop, user, admin):
-    pool = await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
+    pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
     await increment_counter(user.id, cookie, '/about/')
@@ -62,7 +65,8 @@ async def test_increment_success_another_path(db, loop, user, admin):
 
 
 async def test_increment_success_another_visitor(db, loop, user, admin):
-    pool = await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
+    pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
     cookie = uuid4()
@@ -77,7 +81,8 @@ async def test_increment_success_another_visitor(db, loop, user, admin):
 
 
 async def test_increment_success_another_account(db, loop, user, admin):
-    pool = await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
+    pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
     await increment_counter(admin.id, cookie, '/')
@@ -91,7 +96,8 @@ async def test_increment_success_another_account(db, loop, user, admin):
 
 
 async def test_increment_success_tomorrow(db, loop, user, monkeypatch):
-    pool = await prepare_pool(loop, user)
+    await prepare(loop, user)
+    pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
 

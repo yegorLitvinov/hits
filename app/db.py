@@ -1,5 +1,3 @@
-import asyncio
-
 import asyncpg
 
 from .conf import settings
@@ -7,14 +5,14 @@ from .conf import settings
 _pool = None
 
 
-async def get_pool(loop=None):
+async def get_db_pool(loop=None):
     global _pool
     if _pool is None or loop:
         dsn_kwargs = settings.DSN_KWARGS.copy()
         dsn_kwargs['database'] = dsn_kwargs.pop('dbname')
         _pool = await asyncpg.create_pool(
             **dsn_kwargs,
-            loop=loop if loop else asyncio.get_event_loop(),
+            loop=loop,
             min_size=2,
             max_size=10
         )
@@ -43,7 +41,7 @@ class FilterMixin:
             query += 'where ' + ' and '.join(
                 [f'{key} = ${num}' for num, key in enumerate(kwargs.keys(), 1)]
             )
-        pool = await get_pool()
+        pool = await get_db_pool()
         async with pool.acquire() as conn:
             rows = await conn.fetch(query, *kwargs.values())
         return [cls(**row) for row in rows]
@@ -60,3 +58,6 @@ class FilterMixin:
     @classmethod
     async def all(cls):
         return await cls.filter()
+
+    async def refresh_from_db(self):
+        return await self.__class__.get(id=self.id)

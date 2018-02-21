@@ -3,11 +3,11 @@ from asyncpg.exceptions import UndefinedColumnError
 
 from app.account import User
 from app.db import DoesNotExist, MultipleObjectsReturned
-from .conftest import prepare_pool
+from .conftest import prepare
 
 
 async def test_get_by_credentials(db, loop, user, admin):
-    await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
     assert user.api_key != admin.api_key
 
     assert await User.get(email=user.email, password='user') == user
@@ -33,7 +33,7 @@ def test_empty_db(execute, loop):
 
 
 async def test_get_by_id(db, loop, user):
-    await prepare_pool(loop, user)
+    await prepare(loop, user)
     assert await User.get(id=user.id) == user
     with pytest.raises(TypeError) as error:
         await User.get(id='dfdf')
@@ -46,7 +46,7 @@ async def test_get_by_id(db, loop, user):
 
 
 async def test_get_errors(db, loop, user, admin):
-    await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
     with pytest.raises(MultipleObjectsReturned):
         await User.get(is_active=True)
     with pytest.raises(UndefinedColumnError):
@@ -54,10 +54,19 @@ async def test_get_errors(db, loop, user, admin):
 
 
 async def test_filter(db, loop, user, admin):
-    await prepare_pool(loop, user, admin)
+    await prepare(loop, user, admin)
     assert await User.filter(is_active=True) == [user, admin]
     assert await User.filter(is_active=False) == []
     assert await User.filter(is_superuser=True) == [admin]
     assert await User.filter(is_superuser=False) == [user]
     assert await User.filter() == [user, admin]
     assert await User.all() == [user, admin]
+
+
+async def test_update_user(db, loop, user):
+    await prepare(loop, user)
+    user.set_password('new password')
+    await user.save()
+
+    user = await user.refresh_from_db()
+    assert user.password == 'new password'

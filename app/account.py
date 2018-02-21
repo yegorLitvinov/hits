@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from .db import FilterMixin, get_pool
+from .db import FilterMixin, get_db_pool
 
 
 def encrypt_password(password):
@@ -33,7 +33,7 @@ class User(FilterMixin):
         return self.id == other.id
 
     async def save(self):
-        pool = await get_pool()
+        pool = await get_db_pool()
         conn = await pool.acquire()
         try:
             if self.id:

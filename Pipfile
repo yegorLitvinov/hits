@@ -10,6 +10,7 @@ name = "pypi"
 sanic = "*"
 asyncpg = "*"
 ipython = "*"
+aioredis = "*"
 
 
 [dev-packages]
@@ -22,3 +23,5 @@ pdbpp = "*"
 pytest-sanic = "*"
 fabricio = "*"
 "psycopg2-binary" = "*"
+redis = "*"
+pytest-cov = "*"

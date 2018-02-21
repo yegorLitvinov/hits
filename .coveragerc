@@ -1,0 +1,9 @@
+[run]
+
+include =
+    app
+
+omit =
+    */__init__.py
+    */__main__.py
+    app/conf/*
