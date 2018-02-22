@@ -10,10 +10,10 @@ addons:
   postgresql: "9.6"
 
 install:
-  - pip install -r requirements/prod.txt
-  - pip install -r requirements/dev.txt
+  - pip install -r app/requirements/prod.txt
+  - pip install -r app/requirements/dev.txt
 
 before_script:
-  - 'psql -U postgres < sql/init_ci.sql'
+  - 'psql -U postgres < pg/init.sql'
 
 script: PYTHONPATH=`pwd` SETTINGS_MODULE=app.conf.ci pytest

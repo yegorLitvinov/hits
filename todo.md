@@ -8,6 +8,8 @@
 - [ ] test sql injection
 - [ ] async fixtures
 - [ ] ci section in pipfile
+- [ ] postgres rebuild removes data from table
+- [ ] statistics
 
 ## Frontend
 - [ ] admin

@@ -74,7 +74,7 @@ metric_app = tasks.ImageBuildDockerTasks(
     ssh_tunnel='5000:5000',
     registry='localhost:5000',
     hosts=[f'{user}@{host}'],
-    build_path='.',
+    build_path='app',
 )
 
 
@@ -91,5 +91,22 @@ metric_pg = tasks.ImageBuildDockerTasks(
     registry='localhost:5000',
     ssh_tunnel='5000:5000',
     hosts=[f'{user}@{host}'],
-    build_path='sql',
+    build_path='pg',
+)
+
+
+metric_redis = tasks.DockerTasks(
+    service=docker.Container(
+        name='metric_redis',
+        image='redis:alpine',
+        command='--appendonly yes',
+        options=dict(
+            network='metric',
+            ip='172.19.0.4',
+            volume=f'/home/{user}/redisdata:/data',
+        )
+    ),
+    registry='localhost:5000',
+    ssh_tunnel='5000:5000',
+    hosts=[f'{user}@{host}'],
 )

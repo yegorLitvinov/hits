@@ -1,21 +1,28 @@
 .PHONY: backup
 HOST=root@195.201.27.44
-PROJECT_SRC=/home/metric
+USER=metric
+DB=$(USER)
+PROJECT_SRC=/home/$(USER)
 DST=$(realpath ./)
 
-run:
+dev:
 	python develop.py
 
-drop-db:
-	psql -c 'drop database metric;'
+dropdb:
+	psql -c 'drop database $(DB);'
 
-create-db:
-	psql < sql/init.sql
+createdb:
+	psql < pg/init.sql
+
+migrate-from-shell:
+	for file in `ls app/migrations/*.sql` ; do \
+		psql -d $(DB) < $$file ; \
+	done
 
 migrate:
-	psql -d metric < sql/schema.sql
+	python3 app/migrations/migrate.py
 
-reset-db: drop-db create-db migrate
+resetdb: dropdb createdb
 
 isort:
 	@isort -rc app
@@ -32,11 +39,11 @@ cleanup:
 	find . -name .mypy_cache | xargs rm -rfv
 	find . -name .pytest_cache | xargs rm -rfv
 
-create-requirements:
-	pipenv lock -r > requirements/prod.txt
-	pipenv lock -rd > requirements/dev.txt
-	sort requirements/prod.txt -o requirements/prod.txt
-	sort requirements/dev.txt -o requirements/dev.txt
+create-req:
+	pipenv lock -r > app/requirements/prod.txt
+	pipenv lock -rd > app/requirements/dev.txt
+	sort app/requirements/prod.txt -o app/requirements/prod.txt
+	sort app/requirements/dev.txt -o app/requirements/dev.txt
 
 backup:
 	mkdir -p backup/db

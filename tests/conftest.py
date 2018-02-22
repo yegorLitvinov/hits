@@ -53,7 +53,7 @@ async def prepare(loop, user=None, admin=None):
 def sql_dir():
     test_dir = os.path.dirname(os.path.abspath(__file__))
     project_dir = os.path.dirname(test_dir)
-    return os.path.join(project_dir, 'sql')
+    return os.path.join(project_dir, 'app', 'migrations')
 
 
 @pytest.fixture(scope='session')
@@ -77,11 +77,14 @@ def db(sql_dir, reuse_db):
     metric_conn = psycopg2.connect(get_dsn())
     metric_cursor = metric_conn.cursor()
 
-    schema = open(os.path.join(sql_dir, 'schema.sql')).read()
     try:
         if not reuse_db or not exists:
-            metric_cursor.execute(schema)
-            metric_conn.commit()
+            for filename in os.listdir(sql_dir):
+                if not filename.endswith('.sql'):
+                    continue
+                schema = open(os.path.join(sql_dir, filename)).read()
+                metric_cursor.execute(schema)
+                metric_conn.commit()
         yield
     finally:
         root_cursor.execute(f'REVOKE CONNECT ON DATABASE {TEST_DBNAME} FROM public')

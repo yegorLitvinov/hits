@@ -12,10 +12,10 @@ RUN apk add --update build-base
 RUN rm -rf /var/cache/apk/*
 
 USER $USER
-ADD requirements/prod.txt .
-RUN pip install --user -r prod.txt
-ADD app ./app
+ADD ./ ./app
+RUN pip install --user -r app/requirements/prod.txt
+ADD entrypoint.sh ./
 
 EXPOSE 8181
 
-CMD PYTHONPATH=`pwd` SETTINGS_MODULE=app.conf.prod python3 -m app
+CMD /bin/sh ./entrypoint.sh
