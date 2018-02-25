@@ -1,5 +1,5 @@
-from sanic.response import json
 from sanic import Blueprint
+from sanic.response import json
 
 from app.conf import settings
 from app.models import DoesNotExist

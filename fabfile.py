@@ -30,6 +30,14 @@ def install_docker():
 
 @api.hosts(f'root@{host}')
 @api.task
+def create_docker_network():
+    api.run(
+        'docker network create --subnet 172.19.0.0/24 --gateway 172.19.0.1 metric',
+    )
+
+
+@api.hosts(f'root@{host}')
+@api.task
 def user_add():
     api.run(f'useradd -u 1010 -d /home/{user} -s /bin/bash -p wrongpassword {user}')
     api.run(f'usermod -aG docker {user}')
@@ -51,31 +59,6 @@ def copy_nginx():
     api.put('etc/metric_nginx.conf', '/etc/nginx/sites-enabled/metric.conf')
     api.run('nginx -t')
     api.run('service nginx reload')
-
-
-@api.hosts(f'root@{host}')
-@api.task
-def create_network():
-    api.run(
-        'docker network create --subnet 172.19.0.0/24 --gateway 172.19.0.1 metric',
-    )
-
-
-app = tasks.ImageBuildDockerTasks(
-    service=docker.Container(
-        name='metric_app',
-        image='metric_app',
-        options=dict(
-            publish='8181:8181',
-            network='metric',
-            ip='172.19.0.2'
-        ),
-    ),
-    ssh_tunnel='5000:5000',
-    registry='localhost:5000',
-    hosts=[f'{user}@{host}'],
-    build_path='app',
-)
 
 
 pg = tasks.ImageBuildDockerTasks(
@@ -112,12 +95,48 @@ redis = tasks.DockerTasks(
 )
 
 
+app = tasks.ImageBuildDockerTasks(
+    service=docker.Container(
+        name='metric_app',
+        image='metric_app',
+        options=dict(
+            publish='8181:8181',
+            network='metric',
+            ip='172.19.0.2'
+        ),
+    ),
+    ssh_tunnel='5000:5000',
+    registry='localhost:5000',
+    hosts=[f'{user}@{host}'],
+    build_path='app',
+)
+
+
+front = tasks.ImageBuildDockerTasks(
+    service=docker.Container(
+        name='metric_front',
+        image='metric_front',
+        options=dict(
+            publish='8080:8080',
+            network='metric',
+            ip='172.19.0.5'
+        ),
+    ),
+    ssh_tunnel='5000:5000',
+    registry='localhost:5000',
+    hosts=[f'{user}@{host}'],
+    build_path='front',
+)
+
+
 @tasks.infrastructure
 def prod():
     api.env.update(
         roledefs=dict(
+            copy_nginx=[f'root@{host}'],
             pg=[f'{user}@{host}'],
             redis=[f'{user}@{host}'],
             app=[f'{user}@{host}'],
+            front=[f'{user}@{host}'],
         )
     )

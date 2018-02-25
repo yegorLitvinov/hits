@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sanic.response import json
 from sanic import Blueprint
+from sanic.response import json
 
 from app.account.views import auth_required
 
