@@ -15,6 +15,7 @@ from app.connections.redis import get_redis_pool
 
 TEST_DBNAME = settings.DSN_KWARGS['dbname'] + '_test'
 settings.DSN_KWARGS['dbname'] = TEST_DBNAME
+settings.REDIS_KWARGS['db'] = 0
 
 
 def pytest_addoption(parser):
@@ -80,7 +81,7 @@ def db(sql_dir, reuse_db):
 
     try:
         if not reuse_db or not exists:
-            for filename in os.listdir(sql_dir):
+            for filename in sorted(os.listdir(sql_dir)):
                 if not filename.endswith('.sql'):
                     continue
                 schema = open(os.path.join(sql_dir, filename)).read()

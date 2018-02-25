@@ -12,6 +12,8 @@
 - [ ] statistics
 - [ ] test empty api_key
 - [ ] rename visitor -> visit
+- [ ] fix asyncredis warnings
+- [ ] remove check-auth
 
 ## Frontend
-- [ ] login
+- [x] login

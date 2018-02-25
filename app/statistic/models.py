@@ -28,7 +28,7 @@ def get_start_end_dates(now, filter_by):
 
 async def hits(account_id, start_date_str, end_date_str):
     query = """
-    select sum(hits) as _sum from visitor
+    select coalesce(sum(hits), 0) as _sum from visitor
     where account_id = $1 and date >= $2 and date <= $3
     """
     res = await fetch(query, account_id, start_date_str, end_date_str)
