@@ -3,7 +3,8 @@
 ## Simple asyncio hits and visits counter
 
 ### Usage
-Place the following markup at your page
+1. Get your api key from administrator
+2. Place the following markup at your page
 ```html
 <img
     src="http://metr.ddns.net/api/visit/{your_api_key}/"
@@ -11,11 +12,13 @@ Place the following markup at your page
     style="display: none;"
 >
 ```
+3. Watch visit statistics at [http://metr.ddns.net](http://metr.ddns.net)
+
 ### Prepare server
 ```bash
 fab install_docker
 fab create_docker_network
-fab user_ad
+fab user_add
 ```
 
 ### Deploy
