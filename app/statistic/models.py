@@ -40,18 +40,20 @@ async def visits(account_id, start_date_str, end_date_str):
     select count(*) as _count from (
         select distinct cookie from visitor
         where account_id = $1 and date >= $2 and date <= $3
-    )
+    ) as cookies
     """
     res = await fetch(query, account_id, start_date_str, end_date_str)
     return res[0]['_count']
 
 
 async def paths(account_id, start_date_str, end_date_str):
+    # TODO: group by index
     query = """
     select sum(hits) as _sum, path from visitor
     where account_id = $1 and date >= $2 and date <= $3
     group by path
-    order by path
+    order by _sum desc
     """
     res = await fetch(query, account_id, start_date_str, end_date_str)
-    return res
+    stat = [dict(r) for r in res]
+    return stat

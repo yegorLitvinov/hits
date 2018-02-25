@@ -11,6 +11,7 @@
 - [ ] ci section in pipfile
 - [ ] statistics
 - [ ] test empty api_key
+- [ ] rename visitor -> visit
 
 ## Frontend
 - [ ] login
