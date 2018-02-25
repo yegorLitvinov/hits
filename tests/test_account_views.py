@@ -11,6 +11,8 @@ from .conftest import prepare
 async def test_wrong_method(loop, client):
     response = await client.get('/login/')
     assert response.status == 405
+    response = await client.get('/logout/')
+    assert response.status == 405
 
 
 async def test_login_empty_credentials(db, loop, client):
@@ -56,6 +58,19 @@ async def test_login_success(db, loop, client, user):
 
     response = await client.post('/check-auth/')
     assert response.status == 200
+
+
+async def test_login_unactive_user(db, loop, client, user):
+    user.is_active = False
+    await prepare(loop, user)
+    data = ujson.dumps({
+        'email': 'user@example.com',
+        'password': 'user',
+    })
+    response = await client.post('/login/', data=data)
+    assert response.status == 404
+    with pytest.raises(KeyError):
+        cookie = response.cookies[settings.SESSION_COOKIE_NAME]
 
 
 async def test_logout_success(db, loop, client, user):

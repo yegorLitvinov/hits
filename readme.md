@@ -14,6 +14,11 @@ Place the following markup at your page
 
 ### Deploy
 ```bash
-fab metric_pg  # checkout dockerfile
+fab metric_pg
+fab metric_redis
 fab metric_app
+```
+or just 
+```bash
+fab prod
 ```

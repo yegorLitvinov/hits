@@ -61,7 +61,7 @@ def create_network():
     )
 
 
-metric_app = tasks.ImageBuildDockerTasks(
+app = tasks.ImageBuildDockerTasks(
     service=docker.Container(
         name='metric_app',
         image='metric_app',
@@ -78,7 +78,7 @@ metric_app = tasks.ImageBuildDockerTasks(
 )
 
 
-metric_pg = tasks.ImageBuildDockerTasks(
+pg = tasks.ImageBuildDockerTasks(
     service=docker.Container(
         name='metric_pg',
         image='metric_pg',
@@ -95,7 +95,7 @@ metric_pg = tasks.ImageBuildDockerTasks(
 )
 
 
-metric_redis = tasks.DockerTasks(
+redis = tasks.DockerTasks(
     service=docker.Container(
         name='metric_redis',
         image='redis:alpine',
@@ -110,3 +110,14 @@ metric_redis = tasks.DockerTasks(
     ssh_tunnel='5000:5000',
     hosts=[f'{user}@{host}'],
 )
+
+
+@tasks.infrastructure
+def prod():
+    api.env.update(
+        roledefs=dict(
+            pg=[f'{user}@{host}'],
+            redis=[f'{user}@{host}'],
+            app=[f'{user}@{host}'],
+        )
+    )

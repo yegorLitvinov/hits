@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from .db import get_db_pool
+from app.connections.db import get_db_pool
+from app.models import FilterMixin, SaveMixin
 
 
 async def increment_counter(account_id, cookie, path):
@@ -17,3 +18,7 @@ async def increment_counter(account_id, cookie, path):
             path,
             now,
         )
+
+
+class Visitor(FilterMixin, SaveMixin):
+    table_name = 'visitor'

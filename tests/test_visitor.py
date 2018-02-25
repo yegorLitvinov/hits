@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 from asyncpg.exceptions import ForeignKeyViolationError
 
-from app.visitor import increment_counter
-from app.db import get_db_pool
+from app.visitor.models import increment_counter
+from app.connections.db import get_db_pool
 
 from .conftest import prepare
 
@@ -104,8 +104,8 @@ async def test_increment_success_tomorrow(db, loop, user, monkeypatch):
     tomorrow = datetime.now() + timedelta(days=1)
     datetime_mock = MagicMock()
     datetime_mock.now.return_value = tomorrow
-    import app.visitor
-    monkeypatch.setattr(app.visitor, 'datetime', datetime_mock)
+    import app.visitor.models
+    monkeypatch.setattr(app.visitor.models, 'datetime', datetime_mock)
 
     await increment_counter(user.id, cookie, '/')
     async with pool.acquire() as conn:

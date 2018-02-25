@@ -1,8 +1,8 @@
 import pytest
 from asyncpg.exceptions import UndefinedColumnError
 
-from app.account import User
-from app.db import DoesNotExist, MultipleObjectsReturned
+from app.account.models import User
+from app.models import DoesNotExist, MultipleObjectsReturned
 from .conftest import prepare
 
 
@@ -68,5 +68,5 @@ async def test_update_user(db, loop, user):
     user.set_password('new password')
     await user.save()
 
-    user = await user.refresh_from_db()
+    user = await user.get_from_db()
     assert user.password == 'new password'

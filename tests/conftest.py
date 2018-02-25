@@ -1,4 +1,5 @@
 import os
+from uuid import uuid4
 
 import psycopg2
 import pytest
@@ -6,11 +7,11 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sanic import Sanic
 from redis import StrictRedis
 
-from app.views import add_routes
-from app.account import User
+from app.routes import add_routes
+from app.account.models import User
 from app.conf import settings
-from app.db import get_db_pool
-from app.session import get_redis_pool
+from app.connections.db import get_db_pool
+from app.connections.redis import get_redis_pool
 
 TEST_DBNAME = settings.DSN_KWARGS['dbname'] + '_test'
 settings.DSN_KWARGS['dbname'] = TEST_DBNAME
@@ -139,7 +140,8 @@ def user(db):
         email='user@example.com',
         domain='example.com',
         is_active=True,
-        is_superuser=False
+        is_superuser=False,
+        api_key=uuid4(),
     )
     u.set_password('user')
     return u
@@ -151,7 +153,8 @@ def admin(db):
         email='admin@example.com',
         domain='',
         is_active=True,
-        is_superuser=True
+        is_superuser=True,
+        api_key=uuid4(),
     )
     u.set_password('admin')
     return u

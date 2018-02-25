@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from app.conf import settings
-from app.db import get_db_pool
+from app.connections.db import get_db_pool
 
 from .conftest import prepare
 
@@ -37,7 +37,6 @@ async def test_wrong_credentials(db, loop, user, client):
 
 
 async def test_empty_referer(db, loop, user, client):
-    user.is_active = False
     await prepare(loop, user)
     response = await client.get(f'/visit/{user.api_key}/')
     assert response.status == 400

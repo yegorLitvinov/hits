@@ -1,7 +1,7 @@
 from sanic import Sanic
 
 from app.conf import settings
-from app.views import add_routes
+from app.routes import add_routes
 
 if __name__ == '__main__':
     if settings.DEBUG:

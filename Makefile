@@ -6,7 +6,7 @@ PROJECT_SRC=/home/$(USER)
 DST=$(realpath ./)
 
 dev:
-	python develop.py
+	python -m app
 
 dropdb:
 	psql -c 'drop database $(DB);'

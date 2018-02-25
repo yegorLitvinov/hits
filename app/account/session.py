@@ -1,22 +1,9 @@
 from uuid import uuid4
 
-import aioredis
-
-from .account import User
-from .conf import settings
-from .db import DoesNotExist
-
-_pool = None
-
-
-async def get_redis_pool(loop=None):
-    global _pool
-    if not _pool or loop:
-        _pool = await aioredis.create_pool(
-            settings.REDIS_ADDR,
-            loop=loop,
-        )
-    return _pool
+from app.account.models import User
+from app.conf import settings
+from app.connections.redis import get_redis_pool
+from app.models import DoesNotExist
 
 
 async def get_user(request):
