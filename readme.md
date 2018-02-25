@@ -19,6 +19,7 @@
 fab install_docker
 fab create_docker_network
 fab user_add
+fab install_certificates
 ```
 
 ### Deploy

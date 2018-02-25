@@ -49,8 +49,8 @@ def install_certificates():
     api.run('apt-get install software-properties-common')
     api.run('add-apt-repository ppa:certbot/certbot')
     api.run('apt-get update')
-    api.run('apt-get install python-certbot-nginx')
-    api.run(f'certbot --nginx -d {domain}')
+    api.run('apt-get install certbot')
+    api.run(f'certbot certonly --standalone -d {domain}')
 
 
 @api.hosts(f'root@{host}')
