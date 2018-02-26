@@ -17,5 +17,5 @@
 
 ## Frontend
 - [x] login
-- [ ] remove console.log
-- [ ] remove mixed http:// content
+- [x] remove console.log
+- [x] remove mixed http:// content
