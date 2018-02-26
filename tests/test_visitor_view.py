@@ -1,28 +1,28 @@
 from datetime import datetime
 from uuid import UUID
 
+import pytest
 from app.conf import settings
 from app.connections.db import get_db_pool
 
-from .conftest import prepare
+pytestmark = pytest.mark.asyncio
 
 
-async def test_wrong_url(db, loop, client):
+async def test_wrong_url(db, event_loop, client):
     response = await client.get('/')
     assert response.status == 404
     response = await client.get('/api/visit/')
     assert response.status == 404
 
 
-async def test_wrong_method(db, loop, client):
+async def test_wrong_method(db, event_loop, client):
     response = await client.put('/api/visit/somekey')
     assert response.status == 405
     response = await client.post('/api/visit/somekey/')
     assert response.status == 405
 
 
-async def test_wrong_credentials(db, loop, user, client):
-    await prepare(loop, user)
+async def test_wrong_credentials(db, event_loop, user, client):
     response = await client.get('/api/visit/somekey', headers={
         'Referer': 'https://example.com/about/',
     })
@@ -36,24 +36,22 @@ async def test_wrong_credentials(db, loop, user, client):
     assert response.status == 404
 
 
-async def test_empty_referer(db, loop, user, client):
-    await prepare(loop, user)
+async def test_empty_referer(db, event_loop, user, client):
     response = await client.get(f'/api/visit/{user.api_key}/')
     assert response.status == 400
     assert await response.text() == 'Referer\'s domain is empty'
 
 
-async def test_inactive_user(db, loop, user, client):
+async def test_inactive_user(db, event_loop, user, client):
     user.is_active = False
-    await prepare(loop, user)
+    await user.save()
     response = await client.get(f'/api/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',
     })
     assert response.status == 404
 
 
-async def test_2hits(db, loop, client, user):
-    await prepare(loop, user)
+async def test_2hits(db, event_loop, client, user):
     response = await client.get(f'/api/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',  # TODO: querystring in referer
     })

@@ -5,15 +5,18 @@
 - [x] postgres backup, volume and create schema script
 - [x] remove downloaded packages from images
 - [x] postgres rebuild removes data from table
+- [x] fix asyncredis warnings
+- [x] ~~ci section in pipfile~~ not allowed
 - [ ] loading tests
 - [ ] test sql injection
 - [ ] async fixtures
-- [ ] ci section in pipfile
 - [ ] statistics
 - [ ] test empty api_key
 - [ ] rename visitor -> visit
-- [ ] fix asyncredis warnings
 - [ ] remove check-auth
+- [ ] ip address geography
 
 ## Frontend
 - [x] login
+- [ ] remove console.log
+- [ ] remove mixed http:// content

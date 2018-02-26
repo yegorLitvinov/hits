@@ -1,8 +1,10 @@
+import asyncio
 import os
 from uuid import uuid4
 
 import psycopg2
 import pytest
+from pytest_sanic.plugin import test_client as sanic_test_client
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sanic import Sanic
 from redis import StrictRedis
@@ -16,6 +18,16 @@ from app.connections.redis import get_redis_pool
 TEST_DBNAME = settings.DSN_KWARGS['dbname'] + '_test'
 settings.DSN_KWARGS['dbname'] = TEST_DBNAME
 settings.REDIS_KWARGS['db'] = 0
+
+
+def get_dsn(**kwargs):
+    dsn_template = (
+        'dbname={dbname} user={user} password={password} '
+        'host={host} port={port}'
+    )
+    dsn_kwargs = settings.DSN_KWARGS.copy()
+    dsn_kwargs.update(kwargs)
+    return dsn_template.format(**dsn_kwargs)
 
 
 def pytest_addoption(parser):
@@ -32,23 +44,21 @@ def reuse_db(request):
     return request.config.getoption("--reuse-db")
 
 
-def get_dsn(**kwargs):
-    dsn_template = (
-        'dbname={dbname} user={user} password={password} '
-        'host={host} port={port}'
-    )
-    dsn_kwargs = settings.DSN_KWARGS.copy()
-    dsn_kwargs.update(kwargs)
-    return dsn_template.format(**dsn_kwargs)
+@pytest.fixture(autouse=True)
+async def connections(event_loop):
+    db_pool = await get_db_pool(event_loop)
+    redis_pool = await get_redis_pool(event_loop)
+    yield
+    await db_pool.close()
+    redis_pool.close()
+    await redis_pool.wait_closed()
 
 
-async def prepare(loop, user=None, admin=None):
-    await get_db_pool(loop)
-    await get_redis_pool(loop)
-    if user:
-        await user.save()
-    if admin:
-        await admin.save()
+@pytest.fixture(scope='session')
+def session_event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope='session')
@@ -136,7 +146,7 @@ def cleanup_db(execute, redis):
 
 
 @pytest.fixture
-def user(db):
+async def user(db, event_loop):
     u = User(
         email='user@example.com',
         domain='example.com',
@@ -145,11 +155,12 @@ def user(db):
         api_key=uuid4(),
     )
     u.set_password('user')
+    await u.save()
     return u
 
 
 @pytest.fixture
-def admin(db):
+async def admin(db, event_loop):
     u = User(
         email='admin@example.com',
         domain='',
@@ -158,16 +169,22 @@ def admin(db):
         api_key=uuid4(),
     )
     u.set_password('admin')
+    await u.save()
     return u
 
 
 @pytest.fixture
-def app(loop):
+def test_client(event_loop):
+    yield from sanic_test_client(event_loop)
+
+
+@pytest.fixture
+def app(event_loop):
     app = Sanic()
     add_routes(app)
     return app
 
 
 @pytest.fixture
-def client(app, loop, test_client):
-    return loop.run_until_complete(test_client(app))
+def client(app, event_loop, test_client):
+    return event_loop.run_until_complete(test_client(app))

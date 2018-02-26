@@ -5,18 +5,17 @@ from http.cookies import SimpleCookie
 import pytest
 from app.conf import settings
 
-from .conftest import prepare
+pytestmark = pytest.mark.asyncio
 
 
-async def test_wrong_method(loop, client):
+async def test_wrong_method(event_loop, client):
     response = await client.get('/api/account/login/')
     assert response.status == 405
     response = await client.get('/api/account/logout/')
     assert response.status == 405
 
 
-async def test_login_empty_credentials(db, loop, client):
-    await prepare(loop)
+async def test_login_empty_credentials(db, event_loop, client):
     data = ujson.dumps({
         'email': None,
         'password': '234442',
@@ -25,8 +24,7 @@ async def test_login_empty_credentials(db, loop, client):
     assert response.status == 400
 
 
-async def test_login_wrong_credentials(db, loop, client):
-    await prepare(loop)
+async def test_login_wrong_credentials(db, event_loop, client):
     data = ujson.dumps({
         'email': 'admin',
         'password': 'r00t',
@@ -35,7 +33,7 @@ async def test_login_wrong_credentials(db, loop, client):
     assert response.status == 404
 
 
-async def test_unauthorized(loop, client):
+async def test_unauthorized(event_loop, client):
     response = await client.post('/api/account/check-auth/')
     assert response.status == 401
     cookies = SimpleCookie()
@@ -44,8 +42,7 @@ async def test_unauthorized(loop, client):
     assert response.status == 401
 
 
-async def test_login_success(db, loop, client, user):
-    await prepare(loop, user)
+async def test_login_success(db, event_loop, client, user):
     data = ujson.dumps({
         'email': 'user@example.com',
         'password': 'user',
@@ -60,9 +57,9 @@ async def test_login_success(db, loop, client, user):
     assert response.status == 200
 
 
-async def test_login_unactive_user(db, loop, client, user):
+async def test_login_inactive_user(db, event_loop, client, user):
     user.is_active = False
-    await prepare(loop, user)
+    await user.save()
     data = ujson.dumps({
         'email': 'user@example.com',
         'password': 'user',
@@ -70,12 +67,11 @@ async def test_login_unactive_user(db, loop, client, user):
     response = await client.post('/api/account/login/', data=data)
     assert response.status == 404
     with pytest.raises(KeyError):
-        cookie = response.cookies[settings.SESSION_COOKIE_NAME]
+        response.cookies[settings.SESSION_COOKIE_NAME]
 
 
-async def test_logout_success(db, loop, client, user):
+async def test_logout_success(db, event_loop, client, user):
     # TODO: async login fixture
-    await prepare(loop, user)
     data = ujson.dumps({
         'email': 'user@example.com',
         'password': 'user',
@@ -89,9 +85,8 @@ async def test_logout_success(db, loop, client, user):
     assert cookie.value == ''
 
 
-async def test_logout_error(db, loop, client, user):
+async def test_logout_error(db, event_loop, client, user):
     # TODO: async login fixture
-    await prepare(loop, user)
     response = await client.post('/api/account/logout/')
     assert response.status == 401
     with pytest.raises(KeyError):

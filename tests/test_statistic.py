@@ -1,14 +1,14 @@
 from uuid import uuid4
 from datetime import date
 
+import pytest
 from app.statistic.models import hits, visits, paths, get_start_end_dates
 from app.visitor.models import Visitor
 
-from .conftest import prepare
+pytestmark = pytest.mark.asyncio
 
 
-async def test_hits(db, loop, user, admin):
-    await prepare(loop, user, admin)
+async def test_hits(db, event_loop, user, admin):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
     v1 = Visitor(
@@ -49,8 +49,7 @@ async def test_hits(db, loop, user, admin):
     assert hits_count == 1
 
 
-async def test_visits(db, loop, user, admin):
-    await prepare(loop, user, admin)
+async def test_visits(db, event_loop, user, admin):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
     cookie1 = uuid4()
@@ -99,8 +98,7 @@ async def test_visits(db, loop, user, admin):
     assert visits_count == 2
 
 
-async def test_paths(db, loop, user, admin):
-    await prepare(loop, user, admin)
+async def test_paths(db, event_loop, user, admin):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
     cookie1 = uuid4()
