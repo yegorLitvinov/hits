@@ -17,5 +17,5 @@
 
 ## Frontend
 - [x] login
-- [x] remove console.log
 - [x] remove mixed http:// content
+- [x] just copy static, stop using docker!

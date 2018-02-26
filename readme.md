@@ -24,13 +24,9 @@ fab install_certificates
 
 ### Deploy
 ```bash
+fab copy_front
 fab copy_nginx
 fab metric_pg
 fab metric_redis
 fab metric_app
-fab metric_front
-```
-or just
-```bash
-fab prod
 ```

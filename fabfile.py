@@ -1,9 +1,21 @@
 from fabricio import docker, tasks
-from fabric import api
+from fabric import api, colors
 
 host = '195.201.27.44'
 user = 'metric'
 domain = 'metr.ddns.net'
+
+
+# TODO: make working
+@tasks.infrastructure(color=colors.red)
+def prod():
+    api.env.roledefs.update(
+        copy_front=[f'{user}@{host}'],
+        copy_nginx=[f'root@{host}'],
+        pg=[f'{user}@{host}'],
+        redis=[f'{user}@{host}'],
+        app=[f'{user}@{host}'],
+    )
 
 
 @api.hosts(f'root@{host}')
@@ -18,11 +30,15 @@ def install_docker():
         'curl '
         'software-properties-common '
     )
-    api.run('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -')
+    api.run(
+        'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | '
+        'sudo apt-key add -'
+    )
     api.run('apt-key fingerprint 0EBFCD88')
     api.run(
         'add-apt-repository '
-        '"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" '
+        '"deb [arch=amd64] https://download.docker.com/linux/ubuntu '
+        '$(lsb_release -cs) stable" '
     )
     api.run('apt-get update')
     api.run('apt-get install docker-ce')
@@ -59,6 +75,15 @@ def copy_nginx():
     api.put('etc/metric_nginx.conf', '/etc/nginx/sites-enabled/metric.conf')
     api.run('nginx -t')
     api.run('service nginx reload')
+
+
+@api.hosts(f'{user}@{host}')
+@api.task
+def copy_front():
+    front_dir = f'/home/{user}/front'
+    api.run(f'rm -r {front_dir}')
+    api.run(f'mkdir -p {front_dir}')
+    api.put('front/dist', front_dir)
 
 
 pg = tasks.ImageBuildDockerTasks(
@@ -110,33 +135,3 @@ app = tasks.ImageBuildDockerTasks(
     hosts=[f'{user}@{host}'],
     build_path='app',
 )
-
-
-front = tasks.ImageBuildDockerTasks(
-    service=docker.Container(
-        name='metric_front',
-        image='metric_front',
-        options=dict(
-            publish='8080:8080',
-            network='metric',
-            ip='172.19.0.5'
-        ),
-    ),
-    ssh_tunnel='5000:5000',
-    registry='localhost:5000',
-    hosts=[f'{user}@{host}'],
-    build_path='front',
-)
-
-
-@tasks.infrastructure
-def prod():
-    api.env.update(
-        roledefs=dict(
-            copy_nginx=[f'root@{host}'],
-            pg=[f'{user}@{host}'],
-            redis=[f'{user}@{host}'],
-            app=[f'{user}@{host}'],
-            front=[f'{user}@{host}'],
-        )
-    )
