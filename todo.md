@@ -7,10 +7,9 @@
 - [x] postgres rebuild removes data from table
 - [x] fix asyncredis warnings
 - [x] ~~ci section in pipfile~~ not allowed
+- [x] async fixtures
 - [ ] loading tests
 - [ ] test sql injection
-- [ ] async fixtures
-- [ ] statistics
 - [ ] test empty api_key
 - [ ] rename visitor -> visit
 - [ ] remove check-auth

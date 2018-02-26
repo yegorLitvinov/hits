@@ -6,12 +6,7 @@ DSN_KWARGS = dict(
     port=5432
 )
 
-REDIS_KWARGS = dict(
-    host='localhost',
-    port=6379,
-    db=1
-)
-REDIS_ADDR = f'redis://{REDIS_KWARGS["host"]}/{REDIS_KWARGS["db"]}'
+REDIS_ADDR = 'redis://localhost/1'
 
 VISITOR_COOKIE_NAME = '_visitor'
 VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 2

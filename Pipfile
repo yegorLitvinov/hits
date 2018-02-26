@@ -7,7 +7,7 @@ name = "pypi"
 
 [packages]
 
-sanic = "*"
+Sanic = "*"
 asyncpg = "*"
 ipython = "*"
 aioredis = "*"
@@ -17,12 +17,10 @@ aioredis = "*"
 
 "flake8" = "*"
 isort = "*"
-aoiklivereload = "*"
+AoikLiveReload = "*"
 pytest = "*"
 pdbpp = "*"
 fabricio = "*"
-"psycopg2-binary" = "*"
-redis = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
 pytest-sanic = "*"

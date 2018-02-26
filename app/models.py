@@ -87,8 +87,7 @@ class SaveMixin:
                     *self.kwargs.values()
                 )
                 pk = await conn.fetchval(
-                    "SELECT currval(pg_get_serial_sequence('{}', 'id'))".format(
-                        self.table_name
-                    )
+                    "SELECT currval(pg_get_serial_sequence($1, 'id'))",
+                    self.table_name,
                 )
         self.id = pk
