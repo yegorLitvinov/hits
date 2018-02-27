@@ -148,3 +148,14 @@ def app(event_loop):
 @pytest.fixture
 def client(app, event_loop, test_client):
     return event_loop.run_until_complete(test_client(app))
+
+
+@pytest.fixture
+def login(app, client, redis_conn):
+    async def inner(user):
+        session_cookie = str(uuid4())
+        client.session.cookie_jar.update_cookies(
+            {settings.SESSION_COOKIE_NAME: session_cookie}
+        )
+        redis_conn.execute('set', session_cookie, user.id)
+    return inner

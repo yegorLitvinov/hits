@@ -70,15 +70,8 @@ async def test_login_inactive_user(db, event_loop, client, user):
         response.cookies[settings.SESSION_COOKIE_NAME]
 
 
-async def test_logout_success(db, event_loop, client, user):
-    # TODO: async login fixture
-    data = ujson.dumps({
-        'email': 'user@example.com',
-        'password': 'user',
-    })
-    response = await client.post('/api/account/login/', data=data)
-    assert response.status == 200
-
+async def test_logout_success(db, event_loop, client, user, login):
+    await login(user)
     response = await client.post('/api/account/logout/')
     assert response.status == 204
     cookie = response.cookies[settings.SESSION_COOKIE_NAME]
@@ -86,7 +79,6 @@ async def test_logout_success(db, event_loop, client, user):
 
 
 async def test_logout_error(db, event_loop, client, user):
-    # TODO: async login fixture
     response = await client.post('/api/account/logout/')
     assert response.status == 401
     with pytest.raises(KeyError):
