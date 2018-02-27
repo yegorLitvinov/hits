@@ -1,5 +1,5 @@
 DSN_KWARGS = dict(
-    dbname='metric',
+    database='metric',
     user='metric',
     password='password',
     host='localhost',

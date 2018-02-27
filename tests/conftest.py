@@ -13,19 +13,9 @@ from app.account.models import User
 from app.conf import settings
 from app.migrations.migrate import migrate
 
-TEST_DBNAME = settings.DSN_KWARGS['dbname'] + '_test'
-settings.DSN_KWARGS['dbname'] = TEST_DBNAME
+TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
+settings.DSN_KWARGS['database'] = TEST_DBNAME
 settings.REDIS_ADDR = 'redis://localhost/0'
-
-
-def get_dsn(**kwargs):
-    dsn_template = (
-        'dbname={dbname} user={user} password={password} '
-        'host={host} port={port}'
-    )
-    dsn_kwargs = settings.DSN_KWARGS.copy()
-    dsn_kwargs.update(kwargs)
-    return dsn_template.format(**dsn_kwargs)
 
 
 def pytest_addoption(parser):
@@ -49,10 +39,7 @@ def event_loop(request):
 
 @pytest.fixture(scope='session')
 async def db_conn(event_loop):
-    dsn_kwargs = settings.DSN_KWARGS.copy()
-    # TODO: rename this in settings after psycopg removal
-    dsn_kwargs['database'] = dsn_kwargs.pop('dbname')
-    db_conn = await asyncpg.connect(**dsn_kwargs)
+    db_conn = await asyncpg.connect(**settings.DSN_KWARGS)
     yield db_conn
     await db_conn.close()
 
@@ -74,10 +61,9 @@ def sql_dir():
 
 @pytest.fixture(scope='session')
 async def db(sql_dir, reuse_db, event_loop):
-    dsn_kwargs = settings.DSN_KWARGS.copy()
-    dsn_kwargs.pop('dbname')
-    dsn_kwargs['database'] = 'postgres'
-    root_conn = await asyncpg.connect(**dsn_kwargs)
+    root_dsn_kwargs = settings.DSN_KWARGS.copy()
+    root_dsn_kwargs['database'] = 'postgres'
+    root_conn = await asyncpg.connect(**root_dsn_kwargs)
 
     exists = await root_conn.fetch(
         'SELECT 1 FROM pg_database WHERE datname = $1',

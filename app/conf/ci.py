@@ -1,7 +1,7 @@
 from .dev import *  # noqa
 
 DSN_KWARGS = dict(
-    dbname='metric',
+    database='metric',
     user='postgres',
     password='',
     host='localhost',
