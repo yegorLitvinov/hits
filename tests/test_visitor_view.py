@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytest
 from app.conf import settings
-from app.connections.db import get_db_pool
+from app.visitor.models import Visitor
 
 pytestmark = pytest.mark.asyncio
 
@@ -39,6 +39,12 @@ async def test_wrong_credentials(db, event_loop, user, client):
 async def test_empty_referer(db, event_loop, user, client):
     response = await client.get(f'/api/visit/{user.api_key}/')
     assert response.status == 400
+    assert await response.text() == 'Empty referer'
+
+    response = await client.get(f'/api/visit/{user.api_key}/', headers={
+        'Referer': 'strange.addr',
+    })
+    assert response.status == 400
     assert await response.text() == 'Referer\'s domain is empty'
 
 
@@ -53,23 +59,41 @@ async def test_inactive_user(db, event_loop, user, client):
 
 async def test_2hits(db, event_loop, client, user):
     response = await client.get(f'/api/visit/{user.api_key}/', headers={
-        'Referer': 'https://example.com/about/',  # TODO: querystring in referer
+        'Referer': 'https://example.com/about/',
     })
+    assert response.status == 200
     cookie = response.cookies[settings.VISITOR_COOKIE_NAME]
     assert cookie
     assert cookie.value == str(UUID(cookie.value))
     response = await client.get(f'/api/visit/{user.api_key}/', headers={
         'Referer': 'https://example.com/about/',
     })
+    assert response.status == 200
     assert response.cookies.get(settings.VISITOR_COOKIE_NAME) is None
 
-    pool = await get_db_pool()
-    async with pool.acquire() as conn:
-        visitors = await conn.fetch('select * from visitor')
-    assert len(visitors) == 1
-    visitor = visitors[0]
-    assert visitor['cookie'] == UUID(cookie.value)
-    assert visitor['account_id'] == user.id
-    assert visitor['date'] == datetime.now().date()
-    assert visitor['path'] == '/about/'
-    assert visitor['hits'] == 2
+    visitor = await Visitor.get()
+    assert visitor.cookie == UUID(cookie.value)
+    assert visitor.account_id == user.id
+    assert visitor.date == datetime.now().date()
+    assert visitor.path == '/about/'
+    assert visitor.hits == 2
+
+
+async def test_hit_without_trailing_slash(db, event_loop, client, user):
+    response = await client.get(f'/api/visit/{user.api_key}/', headers={
+        'Referer': 'https://example.com',
+    })
+    assert response.status == 200
+    visitor = await Visitor.get()
+    assert visitor.path == '/'
+    assert visitor.hits == 1
+
+
+async def test_hit_querystring(db, event_loop, client, user):
+    response = await client.get(f'/api/visit/{user.api_key}/', headers={
+        'Referer': 'https://example.com?param=value',
+    })
+    assert response.status == 200
+    visitor = await Visitor.get()
+    assert visitor.path == '/'
+    assert visitor.hits == 1

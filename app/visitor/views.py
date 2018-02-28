@@ -1,5 +1,6 @@
 import asyncio
 from uuid import UUID, uuid4
+from urllib.parse import urlparse
 
 from sanic.response import text
 from sanic.views import HTTPMethodView
@@ -32,27 +33,18 @@ class VisitView(HTTPMethodView):
             if not settings.DEBUG:
                 await asyncio.sleep(1)  # bruteforce protection :)
 
-    @staticmethod
-    def _parse_referer(request):
-        "Return (domain, path)."
-        referer = request.headers.get('Referer', '')
-        try:
-            schema, url = referer.split('://', 1)
-            domain, path = url.split('/', 1)
-        except ValueError:
-            return '', ''
-        return domain, '/' + path
-
     async def get(self, request, api_key):
-        domain, path = VisitView._parse_referer(request)
-        print(domain, path)
-        if not domain:
+        referer = request.headers.get('Referer')
+        if not referer:
+            return text('Empty referer', 400)
+        parse_result = urlparse(referer)
+        if not parse_result.netloc:
             return text('Referer\'s domain is empty', status=400)
-        user = await VisitView._get_user(domain, api_key)
+        user = await VisitView._get_user(parse_result.netloc, api_key)
         if not user:
             return text('Account not found', status=404)
 
         response = text('')
         cookie = VisitView._process_cookie(request, response)
-        await increment_counter(user.id, cookie, path)
+        await increment_counter(user.id, cookie, parse_result.path or '/')
         return response
