@@ -8,7 +8,7 @@
 - [x] fix asyncredis warnings
 - [x] ~~ci section in pipfile~~ not allowed
 - [x] async fixtures
-- [ ] loading tests
+- [x] loading tests
 - [ ] test sql injection
 - [ ] test empty api_key
 - [ ] rename visitor -> visit
