@@ -1,10 +1,10 @@
 from datetime import date
-from uuid import uuid4
 from unittest import mock
+from uuid import uuid4
 
 import pytest
-from app.visitor.models import Visitor
 
+from app.visitor.models import Visitor
 
 pytestmark = pytest.mark.asyncio
 

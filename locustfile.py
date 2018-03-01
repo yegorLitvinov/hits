@@ -3,6 +3,7 @@ import random
 
 import asyncpg
 from locust import HttpLocust, TaskSet, task
+
 from app.conf import settings
 
 API_KEY = 'ffdf43e0-465b-41a2-942c-c46f274cd68f'

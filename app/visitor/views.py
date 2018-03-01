@@ -1,6 +1,6 @@
 import asyncio
-from uuid import UUID, uuid4
 from urllib.parse import urlparse
+from uuid import UUID, uuid4
 
 from sanic.response import text
 from sanic.views import HTTPMethodView

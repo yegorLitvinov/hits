@@ -1,17 +1,17 @@
 import os
 from uuid import uuid4
 
-import asyncpg
 import aioredis
+import asyncpg
 import pytest
-from pytest_sanic.plugin import test_client as sanic_test_client
 from pytest_asyncio.plugin import event_loop as asyncio_event_loop
+from pytest_sanic.plugin import test_client as sanic_test_client
 from sanic import Sanic
 
-from app.routes import add_routes
 from app.account.models import User
 from app.conf import settings
 from app.migrations.migrate import migrate
+from app.routes import add_routes
 
 TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
 settings.DSN_KWARGS['database'] = TEST_DBNAME

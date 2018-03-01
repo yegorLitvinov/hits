@@ -1,5 +1,5 @@
-from fabricio import docker, tasks
 from fabric import api, colors
+from fabricio import docker, tasks
 
 host = '195.201.27.44'
 user = 'metric'

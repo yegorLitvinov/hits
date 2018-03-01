@@ -1,8 +1,9 @@
-from uuid import UUID, uuid4
-import ujson
 from http.cookies import SimpleCookie
+from uuid import UUID, uuid4
 
 import pytest
+
+import ujson
 from app.conf import settings
 
 pytestmark = pytest.mark.asyncio

@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
-from uuid import uuid4
 from unittest import mock
+from uuid import uuid4
 
 import pytest
 from asyncpg.exceptions import ForeignKeyViolationError
 
-from app.visitor.models import increment_counter
 from app.connections.db import get_db_pool
+from app.visitor.models import increment_counter
 
 pytestmark = pytest.mark.asyncio
 

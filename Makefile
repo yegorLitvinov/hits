@@ -25,10 +25,10 @@ migrate:
 resetdb: dropdb createdb
 
 isort:
-	@isort -rc app
+	@isort -rc app tests locustfile.py fabfile.py
 
 flake:
-	@flake8 app test
+	@flake8 app test locustfile.py fabfile.py
 
 precommit: flake isort
 

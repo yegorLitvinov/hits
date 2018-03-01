@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
+
 from app.conf import settings
 from app.visitor.models import Visitor
 
