@@ -51,3 +51,7 @@ backup:
 
 test-cov:
 	py.test --cov=app --cov-config .coveragerc --cov-report html:htmlcov
+
+deploy-app:
+	make cleanup
+	fab app
