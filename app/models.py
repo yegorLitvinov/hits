@@ -78,16 +78,12 @@ class SaveMixin:
                     pk,
                 )
             else:
-                await conn.execute(
-                    'insert into {} ({}) values ({})'.format(
+                pk = await conn.fetchval(
+                    'insert into {} ({}) values ({}) returning id'.format(
                         self.table_name,
                         keys,
                         values_template,
                     ),
                     *self.kwargs.values()
-                )
-                pk = await conn.fetchval(
-                    "SELECT currval(pg_get_serial_sequence($1, 'id'))",
-                    self.table_name,
                 )
         self.id = pk
