@@ -15,7 +15,7 @@ from app.migrations.migrate import migrate
 
 TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
 settings.DSN_KWARGS['database'] = TEST_DBNAME
-settings.REDIS_ADDR = 'redis://localhost/0'
+settings.REDIS_ADDR = 'redis://localhost/15'
 
 
 def pytest_addoption(parser):
@@ -71,13 +71,13 @@ async def db(sql_dir, reuse_db, event_loop):
     )
 
     async def create_db():
-        await root_conn.fetch('create database {} owner {}'.format(
+        await root_conn.execute('create database {} owner {}'.format(
             TEST_DBNAME,
             settings.DSN_KWARGS["user"],
         ))
     if not reuse_db:
         if exists:
-            await root_conn.fetch(f'drop database {TEST_DBNAME}')
+            await root_conn.execute(f'drop database {TEST_DBNAME}')
         await create_db()
     elif not exists:
         await create_db()
@@ -87,21 +87,25 @@ async def db(sql_dir, reuse_db, event_loop):
             await migrate()
         yield
     finally:
-        await root_conn.fetch(f'REVOKE CONNECT ON DATABASE {TEST_DBNAME} FROM public')
-        await root_conn.fetch(
+        await root_conn.execute(f'REVOKE CONNECT ON DATABASE {TEST_DBNAME} FROM public')
+        await root_conn.execute(
             'select pg_terminate_backend(pid) from pg_stat_activity where datname = $1',
             TEST_DBNAME,
         )
         if not reuse_db:
-            await root_conn.fetch(f'drop database {TEST_DBNAME}')
+            await root_conn.execute(f'drop database {TEST_DBNAME}')
         await root_conn.close()
 
 
 # FIXME: db implicitly used in all tests
 @pytest.fixture(autouse=True)
-async def cleanup_db(db, db_conn, redis_conn):
-    await db_conn.fetch('delete from visitor')
-    await db_conn.fetch('delete from account')
+async def cleanup_db(db, db_conn):
+    await db_conn.execute('delete from visitor')
+    await db_conn.execute('delete from account')
+
+
+@pytest.fixture(autouse=True)
+async def cleanup_redis(redis_conn):
     await redis_conn.execute('flushdb')
 
 

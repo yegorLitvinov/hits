@@ -11,7 +11,7 @@
 - [x] loading tests
 - [ ] do not reinstall requirements if they have not changed in docker
 - [ ] test sql injection
-- [ ] test empty api_key
+- [ ] explain analize
 - [ ] rename visitor -> visit
 - [ ] remove check-auth
 - [ ] ip address geography

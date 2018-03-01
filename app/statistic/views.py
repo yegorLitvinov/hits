@@ -49,8 +49,9 @@ async def statistic(request):
         now,
         form.cleaned_data['filter_by']
     )
-    return json(dict(
+    data = dict(
         hits=await hits(request['user'].id, start_date_str, end_date_str),
         visits=await visits(request['user'].id, start_date_str, end_date_str),
         paths=await paths(request['user'].id, start_date_str, end_date_str),
-    ))
+    )
+    return json(data)

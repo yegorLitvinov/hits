@@ -16,8 +16,12 @@ async def get_user(request):
     if not user_id:
         return
     try:
-        user = await User.get(id=int(user_id), is_active=True)
-    except (DoesNotExist, ValueError):
+        user_id = int(user_id)
+    except ValueError:
+        return
+    try:
+        user = await User.get(id=user_id, is_active=True)
+    except DoesNotExist:
         return
     return user
 

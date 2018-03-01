@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
-from unittest.mock import MagicMock
+from unittest import mock
 
 import pytest
 from asyncpg.exceptions import ForeignKeyViolationError
@@ -17,12 +17,12 @@ async def test_increment_error_no_user(db, event_loop):
         await increment_counter(0, cookie, '/')
 
 
-async def test_increment_error_wrong_uuid(db, user, event_loop):
+async def test_increment_error_wrong_uuid(user):
     with pytest.raises(ValueError):
         await increment_counter(user.id, '', '/')
 
 
-async def test_increment_success_increase(db, event_loop, user, admin):
+async def test_increment_success_increase(user, admin):
     pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
@@ -46,7 +46,7 @@ async def test_increment_success_increase(db, event_loop, user, admin):
     assert visitor2['hits'] == 2
 
 
-async def test_increment_success_another_path(db, event_loop, user, admin):
+async def test_increment_success_another_path(user, admin):
     pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
@@ -60,7 +60,7 @@ async def test_increment_success_another_path(db, event_loop, user, admin):
     assert visitor2['hits'] == 1
 
 
-async def test_increment_success_another_visitor(db, event_loop, user, admin):
+async def test_increment_success_another_visitor(user, admin):
     pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
@@ -75,7 +75,7 @@ async def test_increment_success_another_visitor(db, event_loop, user, admin):
     assert visitor2['hits'] == 1
 
 
-async def test_increment_success_another_account(db, event_loop, user, admin):
+async def test_increment_success_another_account(user, admin):
     pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
@@ -89,18 +89,16 @@ async def test_increment_success_another_account(db, event_loop, user, admin):
     assert visitor2['hits'] == 1
 
 
-async def test_increment_success_tomorrow(db, event_loop, user, monkeypatch):
+async def test_increment_success_tomorrow(user, monkeypatch):
     pool = await get_db_pool()
     cookie = uuid4()
     await increment_counter(user.id, cookie, '/')
 
     tomorrow = datetime.now() + timedelta(days=1)
-    datetime_mock = MagicMock()
-    datetime_mock.now.return_value = tomorrow
-    import app.visitor.models
-    monkeypatch.setattr(app.visitor.models, 'datetime', datetime_mock)
+    with mock.patch('app.visitor.models.datetime') as datetime_mock:
+        datetime_mock.now.return_value = tomorrow
+        await increment_counter(user.id, cookie, '/')
 
-    await increment_counter(user.id, cookie, '/')
     async with pool.acquire() as conn:
         visitors = await conn.fetch('select * from visitor')
     assert len(visitors) == 2

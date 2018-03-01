@@ -8,7 +8,7 @@ from app.visitor.models import Visitor
 pytestmark = pytest.mark.asyncio
 
 
-async def test_hits(db, event_loop, user, admin):
+async def test_hits(user, admin):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
     v1 = Visitor(
@@ -49,7 +49,7 @@ async def test_hits(db, event_loop, user, admin):
     assert hits_count == 1
 
 
-async def test_visits(db, event_loop, user, admin):
+async def test_visits(user, admin):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
     cookie1 = uuid4()
@@ -98,7 +98,7 @@ async def test_visits(db, event_loop, user, admin):
     assert visits_count == 2
 
 
-async def test_paths(db, event_loop, user, admin):
+async def test_paths(user, admin):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
     cookie1 = uuid4()
