@@ -9,12 +9,12 @@
 - [x] ~~ci section in pipfile~~ not allowed
 - [x] async fixtures
 - [x] loading tests
-- [ ] do not reinstall requirements if they have not changed in docker
+- [x] do not reinstall requirements if they have not changed in docker
+- [x] ~~ip address geography~~ no need
 - [ ] test sql injection
 - [ ] explain analize
 - [ ] rename visitor -> visit
 - [ ] remove check-auth
-- [ ] ip address geography
 
 ## Frontend
 - [x] login
