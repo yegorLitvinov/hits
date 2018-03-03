@@ -11,6 +11,7 @@
 - [x] loading tests
 - [x] do not reinstall requirements if they have not changed in docker
 - [x] ~~ip address geography~~ no need
+- [ ] fix timezone now bug
 - [ ] test sql injection
 - [ ] explain analize
 - [ ] rename visitor -> visit
@@ -20,3 +21,4 @@
 - [x] login
 - [x] remove mixed http:// content
 - [x] just copy static, stop using docker!
+- [x] fix language change bug

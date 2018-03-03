@@ -55,3 +55,8 @@ test-cov:
 deploy-app:
 	make cleanup
 	fab app
+
+deploy-front:
+	cd front && yarn && yarn run build
+	rm front/dist/static/js/*.map
+	@fab copy_front
