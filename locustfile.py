@@ -38,10 +38,9 @@ class UserTasks(TaskSet):
 
     @task
     def statistic(self):
-        result = self.client.get('/api/statistic/', params={
+        self.client.get('/api/statistic/', params={
             'filter_by': 'month',
         })
-        print(result)
 
 
 class WebsiteUser(HttpLocust):

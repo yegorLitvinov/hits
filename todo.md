@@ -11,8 +11,8 @@
 - [x] loading tests
 - [x] do not reinstall requirements if they have not changed in docker
 - [x] ~~ip address geography~~ no need
+- [x] forms (look at wtf-forms or cerberus)
 - [ ] fix timezone now bug (look at pendulum)
-- [ ] forms (look at wtf-forms or cerberus)
 - [ ] test sql injection
 - [ ] explain analize
 - [ ] rename visitor -> visit

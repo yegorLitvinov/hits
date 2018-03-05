@@ -14,6 +14,26 @@ async def test_statistic_unauthenticated(db, client):
     assert response.status == 401
 
 
+async def test_no_params(user, login, client):
+    await login(user)
+    response = await client.get('/api/statistic/')
+    assert response.status == 400
+    data = await response.json()
+    assert data == {
+        'filter_by': ['Not a valid choice']
+    }
+
+
+async def test_invalid_choice(user, login, client):
+    await login(user)
+    response = await client.get('/api/statistic/', params={'filter_by': 'week'})
+    assert response.status == 400
+    data = await response.json()
+    assert data == {
+        'filter_by': ['Not a valid choice']
+    }
+
+
 async def test_statistic_success(user, login, client):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
