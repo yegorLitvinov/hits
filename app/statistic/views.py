@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from sanic import Blueprint
@@ -49,9 +50,11 @@ async def statistic(request):
         now,
         form.cleaned_data['filter_by']
     )
-    data = dict(
-        hits=await hits(request['user'].id, start_date_str, end_date_str),
-        visits=await visits(request['user'].id, start_date_str, end_date_str),
-        paths=await paths(request['user'].id, start_date_str, end_date_str),
-    )
+    tasks = [
+        hits(request['user'].id, start_date_str, end_date_str),
+        visits(request['user'].id, start_date_str, end_date_str),
+        paths(request['user'].id, start_date_str, end_date_str),
+    ]
+    results = await asyncio.gather(*tasks)
+    data = dict(results)
     return json(data)

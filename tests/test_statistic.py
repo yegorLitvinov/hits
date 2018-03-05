@@ -39,14 +39,14 @@ async def test_hits(user, admin):
     for v in v1, v2, v3, v4:
         await v.save()
     # user
-    hits_count = await hits(user.id, *get_start_end_dates(now, 'day'))
+    _, hits_count = await hits(user.id, *get_start_end_dates(now, 'day'))
     assert hits_count == 2
-    hits_count = await hits(user.id, *get_start_end_dates(now, 'month'))
+    _, hits_count = await hits(user.id, *get_start_end_dates(now, 'month'))
     assert hits_count == 3
     # admin
-    hits_count = await hits(admin.id, *get_start_end_dates(now, 'day'))
+    _, hits_count = await hits(admin.id, *get_start_end_dates(now, 'day'))
     assert hits_count == 1
-    hits_count = await hits(admin.id, *get_start_end_dates(now, 'month'))
+    _, hits_count = await hits(admin.id, *get_start_end_dates(now, 'month'))
     assert hits_count == 1
 
 
@@ -88,14 +88,14 @@ async def test_visits(user, admin):
     for v in v1, v2, v3, v4, v5:
         await v.save()
     # user
-    visits_count = await visits(user.id, *get_start_end_dates(now, 'day'))
+    _, visits_count = await visits(user.id, *get_start_end_dates(now, 'day'))
     assert visits_count == 1
-    visits_count = await visits(user.id, *get_start_end_dates(now, 'month'))
+    _, visits_count = await visits(user.id, *get_start_end_dates(now, 'month'))
     assert visits_count == 2
     # admin
-    visits_count = await visits(admin.id, *get_start_end_dates(now, 'day'))
+    _, visits_count = await visits(admin.id, *get_start_end_dates(now, 'day'))
     assert visits_count == 2
-    visits_count = await visits(admin.id, *get_start_end_dates(now, 'month'))
+    _, visits_count = await visits(admin.id, *get_start_end_dates(now, 'month'))
     assert visits_count == 2
 
 
@@ -142,12 +142,12 @@ async def test_paths(user, admin):
     )
     for v in v1, v2, v3, v4, v5, v6:
         await v.save()
-    paths_stat = await paths(user.id, *get_start_end_dates(now, 'day'))
+    _, paths_stat = await paths(user.id, *get_start_end_dates(now, 'day'))
     assert paths_stat == [
         dict(path='/one', _sum=2),
         dict(path='/two', _sum=2),
     ]
-    paths_stat = await paths(user.id, *get_start_end_dates(now, 'month'))
+    _, paths_stat = await paths(user.id, *get_start_end_dates(now, 'month'))
     assert paths_stat == [
         dict(path='/one', _sum=3),
         dict(path='/two', _sum=2),

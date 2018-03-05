@@ -32,7 +32,7 @@ async def hits(account_id, start_date_str, end_date_str):
     where account_id = $1 and date >= $2 and date <= $3
     """
     res = await fetch(query, account_id, start_date_str, end_date_str)
-    return res[0]['_sum']
+    return 'hits', res[0]['_sum']
 
 
 async def visits(account_id, start_date_str, end_date_str):
@@ -43,7 +43,7 @@ async def visits(account_id, start_date_str, end_date_str):
     ) as cookies
     """
     res = await fetch(query, account_id, start_date_str, end_date_str)
-    return res[0]['_count']
+    return 'visits', res[0]['_count']
 
 
 async def paths(account_id, start_date_str, end_date_str):
@@ -56,4 +56,4 @@ async def paths(account_id, start_date_str, end_date_str):
     """
     res = await fetch(query, account_id, start_date_str, end_date_str)
     stat = [dict(r) for r in res]
-    return stat
+    return 'paths', stat
