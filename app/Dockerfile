@@ -12,7 +12,7 @@ WORKDIR $PROJECT_DIR
 
 ADD ./requirements/prod.txt ./
 # this will be cached until requirements will be changed
-RUN pip install -r prod.txt
+RUN pip install --no-cache-dir -r prod.txt
 ADD ./ ./app
 RUN chown -R $USER:$USER $PROJECT_DIR
 USER $USER
