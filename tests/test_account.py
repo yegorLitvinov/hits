@@ -1,29 +1,10 @@
 import pytest
 from asyncpg.exceptions import UndefinedColumnError
 
-from app.account.models import User, encrypt_password
+from app.account.models import User
 from app.models import DoesNotExist, MultipleObjectsReturned
 
 pytestmark = pytest.mark.asyncio
-
-
-async def test_get_by_credentials(user, admin):
-    assert user.api_key != admin.api_key
-    assert await User.get(email=user.email, password=encrypt_password('user')) == user
-    with pytest.raises(DoesNotExist):
-        await User.get(email='email@nonexist.com', password=encrypt_password('user'))
-    with pytest.raises(DoesNotExist):
-        await User.get(email=user.email, password=encrypt_password('user234'))
-    with pytest.raises(DoesNotExist):
-        await User.get(email=user.email, password=encrypt_password('admin'))
-
-    assert await User.get(email=admin.email, password=encrypt_password('admin')) == admin
-    with pytest.raises(DoesNotExist):
-        await User.get(email='exii@test.com', password=encrypt_password('admin'))
-    with pytest.raises(DoesNotExist):
-        await User.get(email=admin.email, password=encrypt_password('user234'))
-    with pytest.raises(DoesNotExist):
-        await User.get(email=admin.email, password=encrypt_password('user'))
 
 
 async def test_get_by_id(user):
@@ -58,4 +39,4 @@ async def test_update_user(user):
     user.set_password('new password')
     await user.save()
     user = await user.get_from_db()
-    assert user.password == encrypt_password('new password')
+    assert user.verify_password('new password')

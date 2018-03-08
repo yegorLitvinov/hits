@@ -1,10 +1,10 @@
 import asyncio
 import random
 
-import asyncpg
 from locust import HttpLocust, TaskSet, task
 
-from app.conf import settings
+from app.account.models import User
+from app.models import DoesNotExist
 
 API_KEY = 'ffdf43e0-465b-41a2-942c-c46f274cd68f'
 REFERER = 'testing.example.com'
@@ -13,16 +13,17 @@ PASSWORD = 'password'
 
 
 async def create_user():
-    db_conn = await asyncpg.connect(**settings.DSN_KWARGS)
-    await db_conn.fetch(
-        """
-        insert into account
-        (api_key, domain, email, is_active, is_superuser, password)
-        values ('{}', '{}', '{}', true, true, '{}')
-        on conflict do nothing
-        """.format(API_KEY, REFERER, EMAIL, PASSWORD)
-    )
-    await db_conn.close()
+    try:
+        user = await User.get(email=EMAIL)
+    except DoesNotExist:
+        user = User()
+    user.api_key = API_KEY
+    user.domain = REFERER
+    user.email = EMAIL
+    user.is_active = True
+    user.is_superuser = False
+    user.set_password(PASSWORD)
+    await user.save()
 
 
 loop = asyncio.get_event_loop()
@@ -46,8 +47,8 @@ class UserTasks(TaskSet):
 class WebsiteUser(HttpLocust):
     task_set = UserTasks
     host = 'http://localhost:8181'
-    min_wait = 100
-    max_wait = 1000
+    min_wait = 1000
+    max_wait = 5000
 
 
 class VisitorTasks(TaskSet):

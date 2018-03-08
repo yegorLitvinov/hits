@@ -12,6 +12,7 @@ asyncpg = "*"
 ipython = "*"
 aioredis = "*"
 wtforms = "*"
+passlib = "*"
 
 
 [dev-packages]

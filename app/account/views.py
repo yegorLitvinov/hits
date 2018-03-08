@@ -1,3 +1,5 @@
+import asyncio
+
 from sanic import Blueprint
 from sanic.response import json
 
@@ -5,7 +7,7 @@ from app.conf import settings
 from app.models import DoesNotExist
 
 from . import session
-from .models import User, encrypt_password
+from .models import User
 
 blueprint = Blueprint('account', url_prefix='/api/account')
 
@@ -28,14 +30,20 @@ async def login(request):
     password = request.json.get('password')
     if not (email and password):
         return json({}, 400)
+
+    async def not_found():
+        if not settings.DEBUG:
+            await asyncio.sleep(1)
+        return json({}, 404)
     try:
         user = await User.get(
             is_active=True,
             email=email,
-            password=encrypt_password(password),
         )
     except DoesNotExist:
-        return json({}, 404)
+        return await not_found()
+    if not user.verify_password(password):
+        return await not_found()
 
     response = json({})
     if request.cookies.get(settings.SESSION_COOKIE_NAME):
