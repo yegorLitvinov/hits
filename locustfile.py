@@ -1,6 +1,7 @@
 import asyncio
 import random
 
+import pytz
 from locust import HttpLocust, TaskSet, task
 
 from app.account.models import User
@@ -39,8 +40,16 @@ class UserTasks(TaskSet):
 
     @task
     def statistic(self):
+        filter_by = random.choice(['month', 'day', 'year'])
         self.client.get('/api/statistic/', params={
-            'filter_by': 'month',
+            'filter_by': filter_by,
+        })
+
+    @task
+    def profile(self):
+        timezone = random.choice(pytz.all_timezones)
+        self.client.patch('/api/account/profile/', json={
+            'timezone': timezone,
         })
 
 
@@ -67,5 +76,5 @@ class WebsiteVisitor(HttpLocust):
     task_set = VisitorTasks
     host = 'http://localhost:8181'
     min_wait = 100
-    max_wait = 1000
+    max_wait = 500
     parent = WebsiteUser

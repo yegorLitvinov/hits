@@ -1,7 +1,10 @@
 import asyncio
 
+import pytz
+import wtforms
 from sanic import Blueprint
 from sanic.response import json
+from wtforms import validators
 
 from app.conf import settings
 from app.models import DoesNotExist
@@ -22,14 +25,16 @@ def auth_required(coroutine):
     return inner
 
 
+class LoginForm(wtforms.Form):
+    email = wtforms.StringField(validators=[validators.input_required()])
+    password = wtforms.StringField(validators=[validators.input_required()])
+
+
 @blueprint.route('/login/', methods=['POST'])
 async def login(request):
-    if not request.json:
-        return json({}, 400)
-    email = request.json.get('email')
-    password = request.json.get('password')
-    if not (email and password):
-        return json({}, 400)
+    form = LoginForm.from_json(request.json)
+    if not form.validate():
+        return json(form.errors, 400)
 
     async def not_found():
         if not settings.DEBUG:
@@ -38,14 +43,14 @@ async def login(request):
     try:
         user = await User.get(
             is_active=True,
-            email=email,
+            email=form.email.data,
         )
     except DoesNotExist:
         return await not_found()
-    if not user.verify_password(password):
+    if not user.verify_password(form.password.data):
         return await not_found()
 
-    response = json({})
+    response = json(user.to_dict(), 200)
     if request.cookies.get(settings.SESSION_COOKIE_NAME):
         await session.delete_user(request, response)
     await session.set_user(user, response)
@@ -65,3 +70,21 @@ async def logout(request):
     response = json({}, 204)
     await session.delete_user(request, response)
     return response
+
+
+class ProfileForm(wtforms.Form):
+    timezone = wtforms.SelectField(
+        choices=list(zip(pytz.all_timezones, pytz.all_timezones))
+    )
+
+
+@blueprint.route('/profile/', methods=['PATCH'])
+@auth_required
+async def profile(request):
+    form = ProfileForm.from_json(request.json)
+    if not form.validate():
+        return json(form.errors, 400)
+    user = request['user']
+    form.populate_obj(user)
+    await user.save()
+    return json(user.to_dict(), 200)

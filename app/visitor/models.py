@@ -1,11 +1,14 @@
 from datetime import datetime
 
+import pytz
+
 from app.connections.db import get_db_pool
 from app.models import FilterMixin, SaveMixin
 
 
-async def increment_counter(account_id, cookie, path):
-    now = datetime.now().date()
+async def increment_counter(user, cookie, path):
+    tz = pytz.timezone(user.timezone)
+    now = datetime.now(tz=tz).date()
     pool = await get_db_pool()
     async with pool.acquire() as conn:
         await conn.fetch(
@@ -13,7 +16,7 @@ async def increment_counter(account_id, cookie, path):
             'values ($1, $2, $3, $4) '
             'on conflict (account_id, cookie, path, date) do '
             'update set hits = visitor.hits + 1 ',
-            account_id,
+            user.id,
             cookie,
             path,
             now,

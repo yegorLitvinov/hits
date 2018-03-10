@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
+import pytz
 
 from app.conf import settings
 from app.visitor.models import Visitor
@@ -75,7 +76,8 @@ async def test_2hits(client, user):
     visitor = await Visitor.get()
     assert visitor.cookie == UUID(cookie.value)
     assert visitor.account_id == user.id
-    assert visitor.date == datetime.now().date()
+    tz = pytz.timezone(user.timezone)
+    assert visitor.date == datetime.now(tz=tz).date()
     assert visitor.path == '/about/'
     assert visitor.hits == 2
 

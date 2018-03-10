@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from passlib.hash import pbkdf2_sha512
 
 from app.conf import settings
@@ -17,3 +19,10 @@ class User(FilterMixin, SaveMixin):
 
     def verify_password(self, password):
         return pbkdf2_sha512.verify(password, self.password)
+
+    def to_dict(self):
+        fields = self.__dict__['kwargs'].copy()
+        fields.pop('password')
+        if isinstance(fields['api_key'], UUID):
+            fields['api_key'] = fields['api_key'].hex
+        return fields

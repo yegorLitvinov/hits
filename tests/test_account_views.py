@@ -18,9 +18,18 @@ async def test_wrong_method(client):
 
 async def test_login_empty_credentials(client):
     data = ujson.dumps({
-        'email': None,
         'password': '234442',
     })
+    response = await client.post('/api/account/login/', data=data)
+    assert response.status == 400
+
+    data = ujson.dumps({
+        'email': '234442',
+    })
+    response = await client.post('/api/account/login/', data=data)
+    assert response.status == 400
+
+    data = ujson.dumps({})
     response = await client.post('/api/account/login/', data=data)
     assert response.status == 400
 
@@ -49,10 +58,13 @@ async def test_login_success(client, user):
         'password': 'user',
     })
     response = await client.post('/api/account/login/', data=data)
+
     assert response.status == 200
     cookie = response.cookies[settings.SESSION_COOKIE_NAME]
     assert cookie
     assert cookie.value == str(UUID(cookie.value))
+    resp_data = await response.json()
+    assert resp_data == user.to_dict()
 
     response = await client.post('/api/account/check-auth/')
     assert response.status == 200
@@ -84,3 +96,25 @@ async def test_logout_error(db, client):
     assert response.status == 401
     with pytest.raises(KeyError):
         response.cookies[settings.SESSION_COOKIE_NAME]
+
+
+async def test_patch_profile_success(client, user, login):
+    await login(user)
+    data = ujson.dumps({
+        'timezone': 'Europe/Moscow',
+    })
+    response = await client.patch('/api/account/profile/', data=data)
+    assert response.status == 200
+    resp_data = await response.json()
+    assert resp_data['timezone'] == 'Europe/Moscow'
+
+
+async def test_patch_profile_error(client, user, login):
+    await login(user)
+    data = ujson.dumps({
+        'timezone': 'Europe/Lipetsk',
+    })
+    response = await client.patch('/api/account/profile/', data=data)
+    assert response.status == 400
+    resp_data = await response.json()
+    assert resp_data['timezone'] == ['Not a valid choice']

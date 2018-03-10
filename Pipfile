@@ -13,6 +13,8 @@ ipython = "*"
 aioredis = "*"
 wtforms = "*"
 passlib = "*"
+pytz = "*"
+wtforms-json = "*"
 
 
 [dev-packages]

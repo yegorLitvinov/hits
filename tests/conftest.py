@@ -117,6 +117,7 @@ async def user(db, event_loop):
         is_active=True,
         is_superuser=False,
         api_key=uuid4(),
+        timezone='UTC',
     )
     u.set_password('user')
     await u.save()
@@ -131,6 +132,7 @@ async def admin(db, event_loop):
         is_active=True,
         is_superuser=True,
         api_key=uuid4(),
+        timezone='UTC',
     )
     u.set_password('admin')
     await u.save()

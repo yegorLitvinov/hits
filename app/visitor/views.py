@@ -46,5 +46,5 @@ class VisitView(HTTPMethodView):
 
         response = text('')
         cookie = VisitView._process_cookie(request, response)
-        await increment_counter(user.id, cookie, parse_result.path or '/')
+        await increment_counter(user, cookie, parse_result.path or '/')
         return response

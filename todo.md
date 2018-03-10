@@ -12,7 +12,9 @@
 - [x] do not reinstall requirements if they have not changed in docker
 - [x] ~~ip address geography~~ no need
 - [x] forms (look at wtf-forms or cerberus)
-- [ ] fix timezone now bug (look at pendulum)
+- [x] fix timezone now bug (look at pendulum)
+- [ ] new visitors
+- [ ] latest visitor browser and ip
 - [ ] test sql injection
 - [ ] explain analize
 - [ ] rename visitor -> visit
@@ -23,3 +25,4 @@
 - [x] remove mixed http:// content
 - [x] just copy static, stop using docker!
 - [x] fix language change bug
+- [ ] year statistic, display filter only for statistic
