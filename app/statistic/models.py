@@ -67,6 +67,7 @@ async def paths(account_id, start_date, end_date):
     where account_id = $1 and date >= $2 and date <= $3
     group by path
     order by _sum desc
+    limit 10
     """
     res = await fetch(query, account_id, start_date, end_date)
     stat = [dict(r) for r in res]
