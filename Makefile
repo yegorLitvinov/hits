@@ -45,9 +45,15 @@ create-req:
 	sort app/requirements/prod.txt -o app/requirements/prod.txt
 	sort app/requirements/dev.txt -o app/requirements/dev.txt
 
+DUMP_FILE=/tmp/dump.sql
 backup:
 	mkdir -p backup/db
-	rsync -r -e ssh $(HOST):$(PROJECT_SRC)/pgdata $(DST)/backup/db/
+	ssh $(HOST) 'docker exec -u postgres metric_pg pg_dump -d metric -f $(DUMP_FILE)'
+	ssh $(HOST) 'docker cp metric_pg:$(DUMP_FILE) $(DUMP_FILE)'
+	scp $(HOST):$(DUMP_FILE) backup/db/
+
+restore:
+	psql -d metric < backup/db/dump.sql
 
 test-cov:
 	py.test --cov=app --cov-config .coveragerc --cov-report html:htmlcov
@@ -58,5 +64,5 @@ deploy-app:
 
 deploy-front:
 	cd front && yarn && yarn run build
-	rm front/dist/static/js/*.map
+	rm -f front/dist/static/js/*.map
 	@fab copy_front

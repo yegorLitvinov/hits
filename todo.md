@@ -15,6 +15,7 @@
 - [x] fix timezone now bug (look at pendulum)
 - [ ] new visitors
 - [ ] latest visitor browser and ip
+- [ ] average visitors (smart statistic)
 - [ ] test sql injection
 - [ ] explain analize
 - [ ] rename visitor -> visit

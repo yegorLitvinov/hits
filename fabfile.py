@@ -1,4 +1,5 @@
 from fabric import api, colors
+from fabric.contrib.project import rsync_project
 from fabricio import docker, tasks
 
 host = '195.201.27.44'
@@ -83,7 +84,7 @@ def copy_front():
     front_dir = f'/home/{user}/front'
     api.run(f'rm -r {front_dir}')
     api.run(f'mkdir -p {front_dir}')
-    api.put('front/dist', front_dir)
+    rsync_project(front_dir, './front/dist')
 
 
 pg = tasks.ImageBuildDockerTasks(

@@ -8,7 +8,7 @@ from sanic.response import json
 
 from app.account.views import auth_required
 
-from .models import get_start_end_dates, hits, paths, visits
+from .models import get_start_end_dates, hits, new_visits, paths, visits
 
 blueprint = Blueprint('statistic', url_prefix='/api/statistic')
 
@@ -29,14 +29,15 @@ async def statistic(request):
     user = request['user']
     tz = pytz.timezone(user.timezone)
     now = datetime.now(tz=tz)
-    start_date_str, end_date_str = get_start_end_dates(
+    start_date, end_date = get_start_end_dates(
         now,
         form.filter_by.data
     )
     tasks = [
-        hits(user.id, start_date_str, end_date_str),
-        visits(user.id, start_date_str, end_date_str),
-        paths(user.id, start_date_str, end_date_str),
+        hits(user.id, start_date, end_date),
+        visits(user.id, start_date, end_date),
+        new_visits(user.id, start_date, end_date),
+        paths(user.id, start_date, end_date),
     ]
     results = await asyncio.gather(*tasks)
     data = dict(results)

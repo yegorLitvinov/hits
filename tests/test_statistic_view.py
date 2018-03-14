@@ -61,6 +61,7 @@ async def test_statistic_success(user, login, client):
     assert data == {
         'hits': 3,
         'visits': 2,
+        'new_visits': 2,
         'paths': [
             {'path': '/one', '_sum': 3}
         ]

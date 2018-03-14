@@ -56,8 +56,8 @@ class UserTasks(TaskSet):
 class WebsiteUser(HttpLocust):
     task_set = UserTasks
     host = 'http://localhost:8181'
-    min_wait = 1000
-    max_wait = 5000
+    min_wait = 100
+    max_wait = 1000
 
 
 class VisitorTasks(TaskSet):

@@ -3,7 +3,8 @@ from uuid import uuid4
 
 import pytest
 
-from app.statistic.models import get_start_end_dates, hits, paths, visits
+from app.statistic.models import (get_start_end_dates, hits, new_visits, paths,
+                                  visits)
 from app.visitor.models import Visitor
 
 pytestmark = pytest.mark.asyncio
@@ -97,6 +98,36 @@ async def test_visits(user, admin):
     assert visits_count == 2
     _, visits_count = await visits(admin.id, *get_start_end_dates(now, 'month'))
     assert visits_count == 2
+
+
+async def test_new_visits(user):
+    now = date(2018, 2, 23)
+    yesterday = date(2018, 2, 22)
+    last_month = date(2018, 1, 14)
+    v1 = Visitor(
+        account_id=user.id,
+        path='/one',
+        date=yesterday,
+        cookie=uuid4(),
+    )
+    v2 = Visitor(
+        account_id=user.id,
+        path='/one',
+        date=now,
+        cookie=uuid4(),
+    )
+    v3 = Visitor(
+        account_id=user.id,
+        path='/two',
+        date=last_month,
+        cookie=uuid4(),
+    )
+    for v in v1, v2, v3:
+        await v.save()
+    _, new_visits_count = await new_visits(user.id, *get_start_end_dates(now, 'day'))
+    assert new_visits_count == 1
+    _, new_visits_count = await new_visits(user.id, *get_start_end_dates(now, 'month'))
+    assert new_visits_count == 2
 
 
 async def test_paths(user, admin):
