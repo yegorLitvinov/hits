@@ -5,8 +5,13 @@ DB=$(USER)
 PROJECT_SRC=/home/$(USER)
 DST=$(realpath ./)
 
-dev:
+dev-server:
 	python -m app
+
+dev-client:
+	cd front && yarn run dev
+
+dev: dev-server dev-client
 
 dropdb:
 	psql -c 'drop database $(DB);'
