@@ -13,7 +13,7 @@
 - [x] ~~ip address geography~~ no need
 - [x] forms (look at wtf-forms or cerberus)
 - [x] fix timezone now bug (look at pendulum)
-- [ ] new visitors
+- [x] new visitors
 - [ ] latest visitor browser and ip
 - [ ] average visitors (smart statistic)
 - [ ] test sql injection

@@ -1,5 +1,4 @@
 from datetime import date
-from unittest import mock
 from uuid import uuid4
 
 import pytest
@@ -20,17 +19,22 @@ async def test_no_params(user, login, client):
     assert response.status == 400
     data = await response.json()
     assert data == {
-        'filter_by': ['Not a valid choice']
+        'filter_by': ['Not a valid choice'],
+        'date': ['This field is required.'],
     }
 
 
 async def test_invalid_choice(user, login, client):
     await login(user)
-    response = await client.get('/api/statistic/', params={'filter_by': 'week'})
+    response = await client.get('/api/statistic/', params={
+        'filter_by': 'week',
+        'date': '22-03-2018',
+    })
     assert response.status == 400
     data = await response.json()
     assert data == {
-        'filter_by': ['Not a valid choice']
+        'filter_by': ['Not a valid choice'],
+        'date': ['This field is required.'],
     }
 
 
@@ -53,9 +57,10 @@ async def test_statistic_success(user, login, client):
     for v in v1, v2:
         await v.save()
     await login(user)
-    with mock.patch('app.statistic.views.datetime') as datetime_mock:
-        datetime_mock.now.return_value = now
-        response = await client.get('/api/statistic/', params={'filter_by': 'month'})
+    response = await client.get('/api/statistic/', params={
+        'filter_by': 'month',
+        'date': now.strftime('%Y-%m-%d'),
+    })
     assert response.status == 200
     data = await response.json()
     assert data == {

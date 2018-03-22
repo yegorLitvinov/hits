@@ -1,7 +1,5 @@
 import asyncio
-from datetime import datetime
 
-import pytz
 import wtforms
 from sanic import Blueprint
 from sanic.response import json
@@ -17,6 +15,7 @@ class StatisticForm(wtforms.Form):
     filter_by = wtforms.SelectField(
         choices=(('day', 'Day'), ('month', 'Month'), ('year', 'Year')),
     )
+    date = wtforms.DateField(validators=[wtforms.validators.DataRequired()])
 
 
 @blueprint.route('/', methods=['GET'])
@@ -27,10 +26,8 @@ async def statistic(request):
         return json(form.errors, 400)
 
     user = request['user']
-    tz = pytz.timezone(user.timezone)
-    now = datetime.now(tz=tz)
     start_date, end_date = get_start_end_dates(
-        now,
+        form.date.data,
         form.filter_by.data
     )
     tasks = [
