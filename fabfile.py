@@ -126,7 +126,6 @@ app = tasks.ImageBuildDockerTasks(
         name='metric_app',
         image='metric_app',
         options=dict(
-            publish='8181:8181',
             network='metric',
             ip='172.19.0.2'
         ),
