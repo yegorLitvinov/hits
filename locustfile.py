@@ -5,7 +5,7 @@ import pytz
 from locust import HttpLocust, TaskSet, task
 
 from app.account.models import User
-from app.models import DoesNotExist
+from app.core.models import DoesNotExist
 
 API_KEY = 'ffdf43e0-465b-41a2-942c-c46f274cd68f'
 REFERER = 'testing.example.com'

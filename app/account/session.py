@@ -3,7 +3,7 @@ from uuid import uuid4
 from app.account.models import User
 from app.conf import settings
 from app.connections.redis import get_redis_pool
-from app.models import DoesNotExist
+from app.core.models import DoesNotExist
 
 
 async def get_user(request):

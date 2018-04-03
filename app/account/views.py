@@ -3,11 +3,12 @@ import asyncio
 import pytz
 import wtforms
 from sanic import Blueprint
+from sanic.request import Request
 from sanic.response import json
 from wtforms import validators
 
 from app.conf import settings
-from app.models import DoesNotExist
+from app.core.models import DoesNotExist
 
 from . import session
 from .models import User
@@ -16,12 +17,17 @@ blueprint = Blueprint('account', url_prefix='/api/account')
 
 
 def auth_required(coroutine):
-    async def inner(request):
+    async def inner(*args):
+        request = None
+        for arg in args:
+            if type(arg) == Request:
+                request = arg
+        assert request is not None
         user = await session.get_user(request)
         if not user:
             return json({}, 401)
         request['user'] = user
-        return await coroutine(request)
+        return await coroutine(*args)
     return inner
 
 

@@ -1,9 +1,10 @@
 from datetime import datetime
 
 import pytz
+from sqlalchemy_utils import UUIDType
 
-from app.connections.db import get_db_pool
-from app.models import FilterMixin, SaveMixin
+from app.connections.db import db, get_db_pool
+from app.core.models import FilterMixin, SaveMixin
 
 
 async def increment_counter(user, cookie, path):
@@ -25,3 +26,23 @@ async def increment_counter(user, cookie, path):
 
 class Visitor(FilterMixin, SaveMixin):
     table_name = 'visitor'
+
+
+class GinoVisitor(db.Model):
+    __tablename__ = 'visitor'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    account_id = db.Column(db.Integer())
+    date = db.Column(db.Date())
+    path = db.Column(db.Unicode(1000))
+    cookie = db.Column(UUIDType())
+    hits = db.Column(db.Integer())
+
+    def __str__(self):
+        return f'{self.id}: {self.hits} hits on {self.path} page ({self.date})'
+
+    def to_dict(self):
+        d = super().to_dict()
+        d['cookie'] = str(d.pop('cookie'))
+        d['date'] = d.pop('date').isoformat()
+        return d

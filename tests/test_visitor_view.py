@@ -1,5 +1,5 @@
-from datetime import datetime
-from uuid import UUID
+from datetime import date, datetime
+from uuid import UUID, uuid4
 
 import pytest
 import pytz
@@ -100,3 +100,36 @@ async def test_hit_querystring(client, user):
     visitor = await Visitor.get()
     assert visitor.path == '/'
     assert visitor.hits == 1
+
+
+async def test_visitors_list(client, user, login):
+    now = date(2018, 2, 23)
+    yesterday = date(2018, 2, 22)
+    v2 = Visitor(
+        account_id=user.id,
+        path='/one',
+        date=now,
+        cookie=uuid4(),
+        hits=2,
+    )
+    v1 = Visitor(
+        account_id=user.id,
+        path='/one',
+        date=yesterday,
+        cookie=uuid4(),
+    )
+    for v in v1, v2:
+        await v.save()
+    await login(user)
+    response = await client.get('/api/visitors/', params={
+        'filter_by': 'month',
+        'date': now.strftime('%Y-%m-%d'),
+        'offset': 0,
+        'limit': 10,
+        'order_by': 'date',
+    })
+    assert response.status == 200
+    data = await response.json()
+    assert len(data['data']) == data['total'] == 2
+    assert data['data'][0]['id'] == v1.id
+    assert data['data'][1]['id'] == v2.id

@@ -1,4 +1,4 @@
-from .connections.db import get_db_pool
+from app.connections.db import get_db_pool
 
 
 class DBError(Exception):
@@ -18,14 +18,25 @@ class FilterMixin:
 
     @classmethod
     async def filter(cls, **kwargs):
+        # TODO: make queryset chaining
+        limit = kwargs.pop('limit', None)
+        offset = kwargs.pop('offset', None)
+
         query = f'select * from {cls.table_name} '
         if kwargs:
             query += 'where ' + ' and '.join(
                 [f'{key} = ${num}' for num, key in enumerate(kwargs.keys(), 1)]
             )
+
+        args = []
+        if limit is not None:
+            query += ' limit ${} '.format(len(kwargs.keys()))
+        if offset is not None:
+            query += ' offset ${} '.format(len(kwargs.keys()) + 1)
+
         pool = await get_db_pool()
         async with pool.acquire() as conn:
-            rows = await conn.fetch(query, *kwargs.values())
+            rows = await conn.fetch(query, *kwargs.values(), *args)
         return [cls(**row) for row in rows]
 
     @classmethod

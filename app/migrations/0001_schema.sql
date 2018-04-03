@@ -32,10 +32,10 @@ ALTER TABLE ONLY account ALTER COLUMN id SET DEFAULT nextval('account_id_seq'::r
 --
 
 create table visitor (
+    id          integer         not null,
     account_id  integer         not null,
     date        date            not null,
     path        varchar(1000)   not null,
-    id          integer         not null,
     cookie      uuid            not null,
     hits        integer         default 1   not null    check(hits > 0),
     unique(cookie, date, account_id, path)

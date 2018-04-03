@@ -2,14 +2,18 @@ import asyncio
 from urllib.parse import urlparse
 from uuid import UUID, uuid4
 
-from sanic.response import text
+from sanic.response import json, text
 from sanic.views import HTTPMethodView
 
 from app.account.models import User
+from app.account.views import auth_required
 from app.conf import settings
-from app.models import DoesNotExist
+from app.connections.db import get_db
+from app.core.models import DoesNotExist
+from app.core.utils import get_start_end_dates
 
-from .models import increment_counter
+from .forms import VisitorFilterForm
+from .models import GinoVisitor, increment_counter
 
 
 class VisitView(HTTPMethodView):
@@ -48,3 +52,39 @@ class VisitView(HTTPMethodView):
         cookie = VisitView._process_cookie(request, response)
         await increment_counter(user, cookie, parse_result.path or '/')
         return response
+
+
+class VisitorListView(HTTPMethodView):
+    @auth_required
+    async def get(self, request):
+        form = VisitorFilterForm(request.args)
+        if not form.validate():
+            return json(form.errors, 400)
+
+        user = request['user']
+        start_date, end_date = get_start_end_dates(
+            form.date.data,
+            form.filter_by.data
+        )
+        db = await get_db()
+        query = (
+            GinoVisitor.query
+            .where(GinoVisitor.date >= start_date)
+            .where(GinoVisitor.date <= end_date)
+            .where(GinoVisitor.account_id == user.id)
+        )
+        visitors = await (
+            query
+            .offset(form.offset.data)
+            .limit(form.limit.data)
+            .order_by(form.order_by.data)
+            .gino.all()
+        )
+        total = await db.alias(query, 'cnt').count().gino.scalar()
+        return json(
+            {
+                'data': (v.to_dict() for v in visitors),
+                'total': total,
+            },
+            status=200,
+        )

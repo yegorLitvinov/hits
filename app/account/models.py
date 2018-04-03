@@ -1,9 +1,7 @@
-from uuid import UUID
-
 from passlib.hash import pbkdf2_sha512
 
 from app.conf import settings
-from app.models import FilterMixin, SaveMixin
+from app.core.models import FilterMixin, SaveMixin
 
 
 def encrypt_password(password):
@@ -23,6 +21,5 @@ class User(FilterMixin, SaveMixin):
     def to_dict(self):
         fields = self.__dict__['kwargs'].copy()
         fields.pop('password')
-        if isinstance(fields['api_key'], UUID):
-            fields['api_key'] = fields['api_key'].hex
+        fields['api_key'] = fields['api_key'].hex
         return fields

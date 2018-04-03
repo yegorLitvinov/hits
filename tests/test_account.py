@@ -2,7 +2,7 @@ import pytest
 from asyncpg.exceptions import UndefinedColumnError
 
 from app.account.models import User
-from app.models import DoesNotExist, MultipleObjectsReturned
+from app.core.models import DoesNotExist, MultipleObjectsReturned
 
 pytestmark = pytest.mark.asyncio
 

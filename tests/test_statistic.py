@@ -3,8 +3,8 @@ from uuid import uuid4
 
 import pytest
 
-from app.statistic.models import (get_start_end_dates, hits, new_visits, paths,
-                                  visits)
+from app.core.utils import get_start_end_dates
+from app.statistic.models import hits, new_visits, paths, visits
 from app.visitor.models import Visitor
 
 pytestmark = pytest.mark.asyncio
