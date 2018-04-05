@@ -75,7 +75,7 @@ class VisitorListView(HTTPMethodView):
         )
         visitors = await (
             query
-            .offset(form.offset.data)
+            .offset(form.offset.data * form.limit.data)
             .limit(form.limit.data)
             .order_by(form.order_by.data)
             .gino.all()
