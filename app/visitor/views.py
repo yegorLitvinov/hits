@@ -8,12 +8,11 @@ from sanic.views import HTTPMethodView
 from app.account.models import User
 from app.account.views import auth_required
 from app.conf import settings
-from app.connections.db import get_db
-from app.core.models import DoesNotExist
+from app.connections.db import db
 from app.core.utils import get_start_end_dates
 
 from .forms import VisitorFilterForm
-from .models import GinoVisitor, increment_counter
+from .models import Visitor, increment_counter
 
 
 class VisitView(HTTPMethodView):
@@ -32,10 +31,20 @@ class VisitView(HTTPMethodView):
     @staticmethod
     async def _get_user(domain, api_key):
         try:
-            return await User.get(domain=domain, api_key=api_key, is_active=True)
-        except (DoesNotExist, ValueError) as error:
-            if not settings.DEBUG:
-                await asyncio.sleep(1)  # bruteforce protection :)
+            UUID(api_key)
+        except ValueError:
+            user = None
+        else:
+            user = await (
+                User.query
+                .where(User.domain == domain)
+                .where(User.api_key == api_key)
+                .where(User.is_active.is_(True))
+                .gino.first()
+            )
+        if user is None and not settings.DEBUG:
+            await asyncio.sleep(1)  # bruteforce protection :)
+        return user
 
     async def get(self, request, api_key):
         referer = request.headers.get('Referer')
@@ -66,12 +75,11 @@ class VisitorListView(HTTPMethodView):
             form.date.data,
             form.filter_by.data
         )
-        db = await get_db()
         query = (
-            GinoVisitor.query
-            .where(GinoVisitor.date >= start_date)
-            .where(GinoVisitor.date <= end_date)
-            .where(GinoVisitor.account_id == user.id)
+            Visitor.query
+            .where(Visitor.date >= start_date)
+            .where(Visitor.date <= end_date)
+            .where(Visitor.account_id == user.id)
         )
         visitors = await (
             query

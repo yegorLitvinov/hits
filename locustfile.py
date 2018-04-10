@@ -1,11 +1,12 @@
 import asyncio
+from datetime import datetime
 import random
 
 import pytz
 from locust import HttpLocust, TaskSet, task
 
-from app.account.models import User
-from app.core.models import DoesNotExist
+from app.account.models import User, encrypt_password
+from app.connections.db import get_db
 
 API_KEY = 'ffdf43e0-465b-41a2-942c-c46f274cd68f'
 REFERER = 'testing.example.com'
@@ -14,17 +15,20 @@ PASSWORD = 'password'
 
 
 async def create_user():
-    try:
-        user = await User.get(email=EMAIL)
-    except DoesNotExist:
-        user = User()
-    user.api_key = API_KEY
-    user.domain = REFERER
-    user.email = EMAIL
-    user.is_active = True
-    user.is_superuser = False
-    user.set_password(PASSWORD)
-    await user.save()
+    await get_db()
+    user = await User.query.where(User.email == EMAIL).gino.first()
+    kwargs = dict(
+        api_key=API_KEY,
+        domain=REFERER,
+        email=EMAIL,
+        is_active=True,
+        is_superuser=False,
+        password=encrypt_password(PASSWORD),
+    )
+    if user:
+        await user.update(**kwargs).apply()
+    else:
+        await User.create(**kwargs)
 
 
 loop = asyncio.get_event_loop()
@@ -43,6 +47,7 @@ class UserTasks(TaskSet):
         filter_by = random.choice(['month', 'day', 'year'])
         self.client.get('/api/statistic/', params={
             'filter_by': filter_by,
+            'date': datetime.now().date().isoformat(),
         })
 
     @task

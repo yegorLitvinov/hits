@@ -51,8 +51,7 @@ async def test_empty_referer(user, client):
 
 
 async def test_inactive_user(user, client):
-    user.is_active = False
-    await user.save()
+    await user.update(is_active=False).apply()
     response = await client.get(f'/api/visit/{user.api_key}/', headers={
         'Referer': f'https://{user.domain}/about/',
     })
@@ -73,7 +72,7 @@ async def test_2hits(client, user):
     assert response.status == 200
     assert response.cookies.get(settings.VISITOR_COOKIE_NAME) is None
 
-    visitor = await Visitor.get()
+    visitor = await Visitor.query.gino.first()
     assert visitor.cookie == UUID(cookie.value)
     assert visitor.account_id == user.id
     tz = pytz.timezone(user.timezone)
@@ -87,7 +86,7 @@ async def test_hit_without_trailing_slash(client, user):
         'Referer': f'http://{user.domain}',
     })
     assert response.status == 200
-    visitor = await Visitor.get()
+    visitor = await Visitor.query.gino.first()
     assert visitor.path == '/'
     assert visitor.hits == 1
 
@@ -97,7 +96,7 @@ async def test_hit_querystring(client, user):
         'Referer': f'http://{user.domain}?param=value',
     })
     assert response.status == 200
-    visitor = await Visitor.get()
+    visitor = await Visitor.query.gino.first()
     assert visitor.path == '/'
     assert visitor.hits == 1
 
@@ -105,21 +104,19 @@ async def test_hit_querystring(client, user):
 async def test_visitors_list(client, user, login):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
-    v2 = Visitor(
+    v2 = await Visitor.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=uuid4(),
         hits=2,
     )
-    v1 = Visitor(
+    v1 = await Visitor.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4(),
     )
-    for v in v1, v2:
-        await v.save()
     await login(user)
     response = await client.get('/api/visitors/', params={
         'filter_by': 'month',

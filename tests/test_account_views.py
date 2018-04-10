@@ -5,6 +5,7 @@ import pytest
 
 import ujson
 from app.conf import settings
+from app.account.models import User
 
 pytestmark = pytest.mark.asyncio
 
@@ -71,8 +72,7 @@ async def test_login_success(client, user):
 
 
 async def test_login_inactive_user(client, user):
-    user.is_active = False
-    await user.save()
+    await user.update(is_active=False).apply()
     data = ujson.dumps({
         'email': user.email,
         'password': 'user',
@@ -107,6 +107,8 @@ async def test_patch_profile_success(client, user, login):
     assert response.status == 200
     resp_data = await response.json()
     assert resp_data['timezone'] == 'Europe/Moscow'
+    user = await User.get(user.id)
+    assert user.timezone == 'Europe/Moscow'
 
 
 async def test_patch_profile_error(client, user, login):

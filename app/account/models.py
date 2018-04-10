@@ -1,7 +1,9 @@
 from passlib.hash import pbkdf2_sha512
 
 from app.conf import settings
-from app.core.models import FilterMixin, SaveMixin
+from app.connections.db import db
+
+from sqlalchemy_utils import UUIDType
 
 
 def encrypt_password(password):
@@ -9,17 +11,23 @@ def encrypt_password(password):
     return pbkdf2_sha512.encrypt(password, rounds=rounds)
 
 
-class User(FilterMixin, SaveMixin):
-    table_name = 'account'
+class User(db.Model):
+    __tablename__ = 'account'
 
-    def set_password(self, password):
-        self.password = encrypt_password(password)
+    id = db.Column(db.Integer(), primary_key=True)
+    api_key = db.Column(UUIDType())
+    domain = db.Column(db.Unicode(100))
+    email = db.Column(db.Unicode(100))
+    is_active = db.Column(db.Boolean())
+    is_superuser = db.Column(db.Boolean())
+    password = db.Column(db.Unicode(1000))
+    timezone = db.Column(db.Unicode(128))
 
     def verify_password(self, password):
         return pbkdf2_sha512.verify(password, self.password)
 
     def to_dict(self):
-        fields = self.__dict__['kwargs'].copy()
+        fields = super().to_dict()
         fields.pop('password')
         fields['api_key'] = fields['api_key'].hex
         return fields

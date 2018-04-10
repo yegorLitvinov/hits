@@ -8,10 +8,11 @@ from pytest_asyncio.plugin import event_loop as asyncio_event_loop
 from pytest_sanic.plugin import test_client as sanic_test_client
 from sanic import Sanic
 
-from app.account.models import User
+from app.account.models import User, encrypt_password
 from app.conf import settings
 from app.migrations.migrate import migrate
 from app.routes import add_routes
+from app.connections.db import get_db
 
 TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
 settings.DSN_KWARGS['database'] = TEST_DBNAME
@@ -82,6 +83,8 @@ async def db(sql_dir, reuse_db, event_loop):
     elif not exists:
         await create_db()
 
+    await get_db()
+
     try:
         if not reuse_db or not exists:
             await migrate()
@@ -111,32 +114,28 @@ async def cleanup_redis(redis_conn):
 
 @pytest.fixture
 async def user(db, event_loop):
-    u = User(
+    return await User.create(
         email='user@example.com',
         domain='example.com',
         is_active=True,
         is_superuser=False,
         api_key=uuid4(),
         timezone='UTC',
+        password=encrypt_password('user'),
     )
-    u.set_password('user')
-    await u.save()
-    return u
 
 
 @pytest.fixture
 async def admin(db, event_loop):
-    u = User(
+    return await User.create(
         email='admin@example.com',
         domain='',
         is_active=True,
         is_superuser=True,
         api_key=uuid4(),
         timezone='UTC',
+        password=encrypt_password('admin'),
     )
-    u.set_password('admin')
-    await u.save()
-    return u
 
 
 @pytest.fixture

@@ -3,7 +3,6 @@ from uuid import uuid4
 from app.account.models import User
 from app.conf import settings
 from app.connections.redis import get_redis_pool
-from app.core.models import DoesNotExist
 
 
 async def get_user(request):
@@ -19,10 +18,12 @@ async def get_user(request):
         user_id = int(user_id)
     except ValueError:
         return
-    try:
-        user = await User.get(id=user_id, is_active=True)
-    except DoesNotExist:
-        return
+    user = await (
+        User.query
+        .where(User.id == user_id)
+        .where(User.is_active.is_(True))
+        .gino.first()
+    )
     return user
 
 

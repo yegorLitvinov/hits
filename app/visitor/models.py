@@ -4,7 +4,6 @@ import pytz
 from sqlalchemy_utils import UUIDType
 
 from app.connections.db import db, get_db_pool
-from app.core.models import FilterMixin, SaveMixin
 
 
 async def increment_counter(user, cookie, path):
@@ -24,11 +23,7 @@ async def increment_counter(user, cookie, path):
         )
 
 
-class Visitor(FilterMixin, SaveMixin):
-    table_name = 'visitor'
-
-
-class GinoVisitor(db.Model):
+class Visitor(db.Model):
     __tablename__ = 'visitor'
 
     id = db.Column(db.Integer(), primary_key=True)

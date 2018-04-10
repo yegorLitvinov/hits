@@ -1,42 +1,33 @@
 import pytest
-from asyncpg.exceptions import UndefinedColumnError
 
-from app.account.models import User
-from app.core.models import DoesNotExist, MultipleObjectsReturned
+from app.account.models import User, encrypt_password
 
 pytestmark = pytest.mark.asyncio
 
 
-async def test_get_by_id(user):
-    assert await User.get(id=user.id) == user
-    with pytest.raises(TypeError) as error:
-        await User.get(id='dfdf')
-    assert 'an integer is required' in str(error)
-    with pytest.raises(DoesNotExist):
-        await User.get(id=-1)
-    with pytest.raises(DoesNotExist):
-        await User.get(id=0)
-    assert await User.get(id=user.id + 0.7) == user  # lol
-
-
-async def test_get_errors(user, admin):
-    with pytest.raises(MultipleObjectsReturned):
-        await User.get(is_active=True)
-    with pytest.raises(UndefinedColumnError):
-        await User.get(wrong_col=True)
+async def test_get_by_id(user, admin):
+    assert (await User.get(user.id)).id == user.id
+    with pytest.raises(ValueError) as error:
+        await User.get('dfdf')
+    assert 'Incorrect number of values as primary key' in str(error)
+    assert await User.get(-1) is None
+    await User.get(0) is None
+    assert (await User.get(user.id + 0.7)).id == user.id  # lol
 
 
 async def test_filter(user, admin):
-    assert await User.filter(is_active=True) == [user, admin]
-    assert await User.filter(is_active=False) == []
-    assert await User.filter(is_superuser=True) == [admin]
-    assert await User.filter(is_superuser=False) == [user]
-    assert await User.filter() == [user, admin]
-    assert await User.all() == [user, admin]
+    users = await User.query.where(User.is_active==True).gino.all()  # noqa
+    assert list(map(lambda u: u.id, users)) == [user.id, admin.id]
+    assert await User.query.where(User.is_active==False).gino.all() == []  # noqa
+    users = await User.query.where(User.is_superuser==True).gino.all()  # noqa
+    assert list(map(lambda u: u.id, users)) == [admin.id]
+    users = await User.query.where(User.is_superuser==False).gino.all()  # noqa
+    assert list(map(lambda u: u.id, users)) == [user.id]
+    users = await User.query.gino.all()
+    assert list(map(lambda u: u.id, users)) == [user.id, admin.id]
 
 
-async def test_update_user(user):
-    user.set_password('new password')
-    await user.save()
-    user = await user.get_from_db()
+async def test_update_password(user):
+    await user.update(password=encrypt_password('new password')).apply()
+    user = await User.get(user.id)
     assert user.verify_password('new password')

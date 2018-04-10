@@ -6,6 +6,15 @@ DSN_KWARGS = dict(
     port=5432
 )
 
+# app.config.DB_HOST = 'metric'
+# app.config.DB_PORT = 5432
+# app.config.DB_USER = 'metric'
+# app.config.DB_PASSWORD = 'password'
+# app.config.DB_DATABASE = 'metric'
+# app.config.DB_POOL_MIN_SIZE = 2
+# app.config.DB_POOL_MAX_SIZE = 10
+# app.config.DB_USE_CONNECTION_FOR_REQUEST = True
+
 REDIS_ADDR = 'redis://localhost/1'
 
 VISITOR_COOKIE_NAME = '_visitor'

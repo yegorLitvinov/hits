@@ -8,7 +8,6 @@ from sanic.response import json
 from wtforms import validators
 
 from app.conf import settings
-from app.core.models import DoesNotExist
 
 from . import session
 from .models import User
@@ -46,12 +45,13 @@ async def login(request):
         if not settings.DEBUG:
             await asyncio.sleep(1)
         return json({}, 404)
-    try:
-        user = await User.get(
-            is_active=True,
-            email=form.email.data,
-        )
-    except DoesNotExist:
+    user = await (
+        User.query
+        .where(User.is_active.is_(True))
+        .where(User.email == form.email.data)
+        .gino.first()
+    )
+    if user is None:
         return await not_found()
     if not user.verify_password(form.password.data):
         return await not_found()
@@ -91,6 +91,5 @@ async def profile(request):
     if not form.validate():
         return json(form.errors, 400)
     user = request['user']
-    form.populate_obj(user)
-    await user.save()
+    await user.update(**form.data).apply()
     return json(user.to_dict(), 200)

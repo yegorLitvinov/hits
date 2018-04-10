@@ -41,21 +41,19 @@ async def test_invalid_choice(user, login, client):
 async def test_statistic_success(user, login, client):
     now = date(2018, 2, 23)
     yesterday = date(2018, 2, 22)
-    v1 = Visitor(
+    await Visitor.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4(),
         hits=2,
     )
-    v2 = Visitor(
+    await Visitor.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=uuid4(),
     )
-    for v in v1, v2:
-        await v.save()
     await login(user)
     response = await client.get('/api/statistic/', params={
         'filter_by': 'month',

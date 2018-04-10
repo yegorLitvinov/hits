@@ -14,12 +14,16 @@
 - [x] forms (look at wtf-forms or cerberus)
 - [x] fix timezone now bug (look at pendulum)
 - [x] new visitors
+- [x] use orm
 - [ ] latest visitor browser and ip
 - [ ] average visitors (smart statistic)
 - [ ] test sql injection
 - [ ] explain analize
-- [ ] rename visitor -> visit
+- [ ] rename visitor -> visit, only one record for visit
 - [ ] remove check-auth
+- [ ] migrations table
+- [ ] gino sanic config
+- [ ] remove get_db_pool
 
 ## Frontend
 - [x] login
@@ -27,3 +31,4 @@
 - [x] just copy static, stop using docker!
 - [x] fix language change bug
 - [ ] year statistic, display filter only for statistic
+- [ ] count offset on the front side
