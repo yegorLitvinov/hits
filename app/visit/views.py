@@ -1,7 +1,7 @@
 import asyncio
+from datetime import datetime
 from urllib.parse import urlparse
 from uuid import UUID, uuid4
-from datetime import datetime
 
 import pytz
 from sanic.response import json, text

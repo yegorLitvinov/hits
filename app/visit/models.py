@@ -1,4 +1,4 @@
-from sqlalchemy_utils import UUIDType, IPAddressType
+from sqlalchemy_utils import IPAddressType, UUIDType
 
 from app.connections.db import db
 

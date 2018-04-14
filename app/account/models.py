@@ -1,9 +1,8 @@
 from passlib.hash import pbkdf2_sha512
+from sqlalchemy_utils import UUIDType
 
 from app.conf import settings
 from app.connections.db import db
-
-from sqlalchemy_utils import UUIDType
 
 
 def encrypt_password(password):

@@ -10,9 +10,9 @@ from sanic import Sanic
 
 from app.account.models import User, encrypt_password
 from app.conf import settings
+from app.connections.db import get_db
 from app.migrations.migrate import migrate
 from app.routes import add_routes
-from app.connections.db import get_db
 
 TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
 settings.DSN_KWARGS['database'] = TEST_DBNAME

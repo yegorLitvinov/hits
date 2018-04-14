@@ -4,8 +4,8 @@ from uuid import UUID, uuid4
 import pytest
 
 import ujson
-from app.conf import settings
 from app.account.models import User
+from app.conf import settings
 
 pytestmark = pytest.mark.asyncio
 
