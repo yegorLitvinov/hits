@@ -132,6 +132,17 @@ async def test_hit_querystring(client, user):
     assert visits[0].path == '/'
 
 
+async def test_real_ip(client, user):
+    response = await client.get(f'/api/visit/{user.api_key}/', headers={
+        'Referer': f'http://{user.domain}?param=value',
+        'X-Forwarded-For': '1.1.1.1',
+    })
+    assert response.status == 200
+    visits = await Visit.query.gino.all()
+    assert len(visits) == 1
+    assert str(visits[0].ip) == '1.1.1.1'
+
+
 async def test_visits_list(client, user, login):
     ua = UserAgent()
     now = datetime(2018, 2, 23)

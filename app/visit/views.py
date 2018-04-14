@@ -53,6 +53,7 @@ class VisitView(HTTPMethodView):
     async def get(self, request, api_key):
         referer = request.headers.get('Referer')
         ua_str = request.headers.get('User-Agent', '')
+        ip = request.headers.get('X-Forwarded-For')
         if not referer:
             return text('Empty referer', 400)
         parse_result = urlparse(referer)
@@ -71,7 +72,7 @@ class VisitView(HTTPMethodView):
             cookie=cookie,
             path='/' if parse_result.path == '' else parse_result.path,
             date=now,
-            ip=request.ip,
+            ip=ip,
             user_agent=serialize_user_agent(parse(ua_str)),
         )
         return response
