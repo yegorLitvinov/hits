@@ -1,10 +1,11 @@
 from calendar import monthrange
-from datetime import datetime
+from datetime import datetime, time
 
 
 def get_start_end_dates(now, filter_by):
     if filter_by == 'day':
-        start_date = end_date = now
+        start_date = datetime.combine(now, time(0, 0))
+        end_date = datetime.combine(now, time(23, 59, 59))
     elif filter_by == 'month':
         end_day = monthrange(now.year, now.month)[1]
         start_date = datetime(now.year, now.month, 1)

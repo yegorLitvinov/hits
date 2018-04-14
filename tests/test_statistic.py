@@ -38,14 +38,14 @@ async def test_hits(user, admin):
         cookie=uuid4()
     )
     # user
-    _, hits_count = await hits(user.id, *get_start_end_dates(now, 'day'))
+    _, hits_count = await hits(user.id, *get_start_end_dates(now.date(), 'day'))
     assert hits_count == 2
-    _, hits_count = await hits(user.id, *get_start_end_dates(now, 'month'))
+    _, hits_count = await hits(user.id, *get_start_end_dates(now.date(), 'month'))
     assert hits_count == 3
     # admin
-    _, hits_count = await hits(admin.id, *get_start_end_dates(now, 'day'))
+    _, hits_count = await hits(admin.id, *get_start_end_dates(now.date(), 'day'))
     assert hits_count == 1
-    _, hits_count = await hits(admin.id, *get_start_end_dates(now, 'month'))
+    _, hits_count = await hits(admin.id, *get_start_end_dates(now.date(), 'month'))
     assert hits_count == 1
 
 
@@ -85,14 +85,14 @@ async def test_visits(user, admin):
         cookie=cookie2,
     )
     # user
-    _, visits_count = await visits(user.id, *get_start_end_dates(now, 'day'))
+    _, visits_count = await visits(user.id, *get_start_end_dates(now.date(), 'day'))
     assert visits_count == 1
-    _, visits_count = await visits(user.id, *get_start_end_dates(now, 'month'))
+    _, visits_count = await visits(user.id, *get_start_end_dates(now.date(), 'month'))
     assert visits_count == 2
     # admin
-    _, visits_count = await visits(admin.id, *get_start_end_dates(now, 'day'))
+    _, visits_count = await visits(admin.id, *get_start_end_dates(now.date(), 'day'))
     assert visits_count == 2
-    _, visits_count = await visits(admin.id, *get_start_end_dates(now, 'month'))
+    _, visits_count = await visits(admin.id, *get_start_end_dates(now.date(), 'month'))
     assert visits_count == 2
 
 
@@ -118,9 +118,9 @@ async def test_new_visits(user):
         date=last_month,
         cookie=uuid4(),
     )
-    _, new_visits_count = await new_visits(user.id, *get_start_end_dates(now, 'day'))
+    _, new_visits_count = await new_visits(user.id, *get_start_end_dates(now.date(), 'day'))
     assert new_visits_count == 1
-    _, new_visits_count = await new_visits(user.id, *get_start_end_dates(now, 'month'))
+    _, new_visits_count = await new_visits(user.id, *get_start_end_dates(now.date(), 'month'))
     assert new_visits_count == 2
 
 
@@ -165,12 +165,12 @@ async def test_paths(user, admin):
         date=yesterday,
         cookie=cookie1,
     )
-    _, paths_stat = await paths(user.id, *get_start_end_dates(now, 'day'))
+    _, paths_stat = await paths(user.id, *get_start_end_dates(now.date(), 'day'))
     assert paths_stat == [
         dict(path='/one', _sum=2),
         dict(path='/two', _sum=2),
     ]
-    _, paths_stat = await paths(user.id, *get_start_end_dates(now, 'month'))
+    _, paths_stat = await paths(user.id, *get_start_end_dates(now.date(), 'month'))
     assert paths_stat == [
         dict(path='/one', _sum=3),
         dict(path='/two', _sum=2),
