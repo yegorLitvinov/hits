@@ -7,12 +7,12 @@
 2. Place the following markup at your page
 ```html
 <img
-    src="http://metr.ddns.net/api/visit/{your_api_key}/"
+    src="http://metr.tvgun.ga/api/visit/{your_api_key}/"
     alt="Hits counter"
     style="display: none;"
 >
 ```
-3. Watch visit statistics at [http://metr.ddns.net](http://metr.ddns.net)
+3. Watch visit statistics at [http://metr.tvgun.ga](http://metr.tvgun.ga)
 
 ### Prepare server
 ```bash
