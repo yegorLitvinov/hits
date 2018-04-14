@@ -35,7 +35,7 @@ isort:
 flake:
 	@flake8 app test locustfile.py fabfile.py
 
-precommit: flake isort
+precommit: flake isort create-req
 
 cleanup:
 	find . -name \*.pyc | xargs rm -fv

@@ -16,15 +16,16 @@
 - [x] new visitors
 - [x] use orm
 - [x] rename visitor -> visit, only one record for visit
-- [ ] latest visitor browser and ip
-- [ ] browser statistics with python-user-agents
+- [x] latest visitor browser and ip
+- [x] browser info with python-user-agents
+- [x] ~~ test sql injection ~~ orm used
+- [x] migrations table
 - [ ] average visits (smart statistic)
-- [ ] test sql injection
 - [ ] explain analize
 - [ ] remove check-auth
-- [ ] migrations table
 - [ ] gino sanic config
 - [ ] remove get_db_pool
+- [ ] zombodb
 
 ## Frontend
 - [x] login

@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 import pytz
 from sanic.response import json, text
 from sanic.views import HTTPMethodView
+from user_agents import parse
 
 from app.account.models import User
 from app.account.views import auth_required
@@ -15,6 +16,7 @@ from app.core.utils import get_start_end_dates
 
 from .forms import VisitFilterForm
 from .models import Visit
+from .utils import serialize_user_agent
 
 
 class VisitView(HTTPMethodView):
@@ -50,7 +52,7 @@ class VisitView(HTTPMethodView):
 
     async def get(self, request, api_key):
         referer = request.headers.get('Referer')
-        browser = request.headers.get('User-Agent')
+        ua_str = request.headers.get('User-Agent', '')
         if not referer:
             return text('Empty referer', 400)
         parse_result = urlparse(referer)
@@ -69,8 +71,8 @@ class VisitView(HTTPMethodView):
             cookie=cookie,
             path='/' if parse_result.path == '' else parse_result.path,
             date=now,
-            # ip=request.ip,
-            # browser=browser,
+            ip=request.ip,
+            user_agent=serialize_user_agent(parse(ua_str)),
         )
         return response
 

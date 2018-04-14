@@ -2,7 +2,7 @@ import asyncio
 import os
 from logging import Logger
 
-from asyncpg.exceptions import PostgresError, UndefinedTableError
+from asyncpg.exceptions import UndefinedTableError
 
 from app.connections.db import get_db_pool
 
@@ -27,14 +27,12 @@ async def migrate():
             if filename in applied_migrations:
                 continue
             content = open(os.path.join(migrations_dir, filename)).read()
-            try:
+            async with conn.transaction():
                 await conn.execute(content)
-            except PostgresError as error:
-                logger.error(str(error))
-            await conn.execute(
-                'insert into migration (name) values ($1)',
-                filename,
-            )
+                await conn.execute(
+                    'insert into migration (name) values ($1)',
+                    filename,
+                )
 
 
 if __name__ == '__main__':

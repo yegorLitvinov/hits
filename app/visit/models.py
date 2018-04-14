@@ -1,4 +1,4 @@
-from sqlalchemy_utils import IPAddressType, UUIDType
+from sqlalchemy_utils import IPAddressType, JSONType, UUIDType
 
 from app.connections.db import db
 
@@ -11,8 +11,8 @@ class Visit(db.Model):
     date = db.Column(db.DateTime())
     path = db.Column(db.Unicode(1000))
     cookie = db.Column(UUIDType())
-    # ip = db.Column(IPAddressType())
-    # browser = db.Column(db.Unicode(1000))
+    ip = db.Column(IPAddressType())
+    user_agent = db.Column(JSONType)
 
     def __repr__(self):
         return f'Visit #{self.id} on "{self.path}" page at "{self.date}"'

@@ -17,6 +17,7 @@ pytz = "*"
 wtforms-json = "*"
 sqlalchemy-utils = "*"
 gino = "*"
+user-agents = "*"
 
 
 [dev-packages]
@@ -32,3 +33,4 @@ pytest-asyncio = "*"
 pytest-sanic = "*"
 locustio = "*"
 "autopep8" = "*"
+fake-useragent = "*"

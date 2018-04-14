@@ -7,9 +7,9 @@ pytestmark = pytest.mark.asyncio
 
 async def test_get_by_id(user, admin):
     assert (await User.get(user.id)).id == user.id
-    with pytest.raises(ValueError) as error:
+    with pytest.raises(TypeError) as error:
         await User.get('dfdf')
-    assert 'Incorrect number of values as primary key' in str(error)
+    assert 'an integer is required' in str(error)
     assert await User.get(-1) is None
     await User.get(0) is None
     assert (await User.get(user.id + 0.7)).id == user.id  # lol

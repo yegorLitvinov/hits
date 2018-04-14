@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 import pytest
 import pytz
+from fake_useragent import UserAgent
 
 from app.conf import settings
 from app.visit.models import Visit
@@ -92,6 +93,32 @@ async def test_hit_without_trailing_slash(client, user):
     visits = await Visit.query.gino.all()
     assert len(visits) == 1
     assert visits[0].path == '/'
+
+
+async def test_visit_user_agent(client, user):
+    ua = UserAgent()
+    response = await client.get(f'/api/visit/{user.api_key}/', headers={
+        'Referer': f'http://{user.domain}',
+        'User-Agent': ua.random,
+    })
+    assert response.status == 200
+    visits = await Visit.query.gino.all()
+    assert len(visits) == 1
+    assert visits[0].path == '/'
+    assert visits[0].user_agent
+
+
+async def test_visit_user_agent_no_header(client, user):
+    response = await client.get(
+        f'/api/visit/{user.api_key}/',
+        headers={'Referer': f'http://{user.domain}'},
+        skip_auto_headers={'USER-AGENT'},
+    )
+    assert response.status == 200
+    visits = await Visit.query.gino.all()
+    assert len(visits) == 1
+    assert visits[0].path == '/'
+    assert visits[0].user_agent['ua_string'] == ''
 
 
 async def test_hit_querystring(client, user):

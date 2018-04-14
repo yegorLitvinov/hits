@@ -3,6 +3,7 @@ import random
 from datetime import datetime
 
 import pytz
+from fake_useragent import UserAgent
 from locust import HttpLocust, TaskSet, task
 
 from app.account.models import User, encrypt_password
@@ -66,6 +67,9 @@ class WebsiteUser(HttpLocust):
 
 
 class VisitTasks(TaskSet):
+    def on_start(self):
+        self.ua = UserAgent()
+
     @task
     def visit(self):
         path = random.choice([
@@ -74,6 +78,7 @@ class VisitTasks(TaskSet):
         ])
         self.client.get(f'/api/visit/{API_KEY}/', headers={
             'Referer': f'http://{REFERER}/{path}',
+            'User-Agent': self.ua.random,
         })
 
 
