@@ -65,7 +65,7 @@ class WebsiteUser(HttpLocust):
     max_wait = 1000
 
 
-class VisitorTasks(TaskSet):
+class VisitTasks(TaskSet):
     @task
     def visit(self):
         path = random.choice([
@@ -77,8 +77,8 @@ class VisitorTasks(TaskSet):
         })
 
 
-class WebsiteVisitor(HttpLocust):
-    task_set = VisitorTasks
+class WebsiteVisit(HttpLocust):
+    task_set = VisitTasks
     host = 'http://localhost:8181'
     min_wait = 100
     max_wait = 500

@@ -1,9 +1,9 @@
-from datetime import date
+from datetime import datetime
 from uuid import uuid4
 
 import pytest
 
-from app.visitor.models import Visitor
+from app.visit.models import Visit
 
 pytestmark = pytest.mark.asyncio
 
@@ -39,16 +39,15 @@ async def test_invalid_choice(user, login, client):
 
 
 async def test_statistic_success(user, login, client):
-    now = date(2018, 2, 23)
-    yesterday = date(2018, 2, 22)
-    await Visitor.create(
+    now = datetime(2018, 2, 23)
+    yesterday = datetime(2018, 2, 22)
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4(),
-        hits=2,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
@@ -62,10 +61,10 @@ async def test_statistic_success(user, login, client):
     assert response.status == 200
     data = await response.json()
     assert data == {
-        'hits': 3,
+        'hits': 2,
         'visits': 2,
         'new_visits': 2,
         'paths': [
-            {'path': '/one', '_sum': 3}
+            {'path': '/one', '_sum': 2}
         ]
     }

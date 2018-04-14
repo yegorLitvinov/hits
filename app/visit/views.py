@@ -1,7 +1,9 @@
 import asyncio
 from urllib.parse import urlparse
 from uuid import UUID, uuid4
+from datetime import datetime
 
+import pytz
 from sanic.response import json, text
 from sanic.views import HTTPMethodView
 
@@ -11,8 +13,8 @@ from app.conf import settings
 from app.connections.db import db
 from app.core.utils import get_start_end_dates
 
-from .forms import VisitorFilterForm
-from .models import Visitor, increment_counter
+from .forms import VisitFilterForm
+from .models import Visit
 
 
 class VisitView(HTTPMethodView):
@@ -48,6 +50,7 @@ class VisitView(HTTPMethodView):
 
     async def get(self, request, api_key):
         referer = request.headers.get('Referer')
+        browser = request.headers.get('User-Agent')
         if not referer:
             return text('Empty referer', 400)
         parse_result = urlparse(referer)
@@ -59,14 +62,23 @@ class VisitView(HTTPMethodView):
 
         response = text('')
         cookie = VisitView._process_cookie(request, response)
-        await increment_counter(user, cookie, parse_result.path or '/')
+        tz = pytz.timezone(user.timezone)
+        now = datetime.now(tz=tz)
+        await Visit.create(
+            account_id=user.id,
+            cookie=cookie,
+            path='/' if parse_result.path == '' else parse_result.path,
+            date=now,
+            # ip=request.ip,
+            # browser=browser,
+        )
         return response
 
 
-class VisitorListView(HTTPMethodView):
+class VisitListView(HTTPMethodView):
     @auth_required
     async def get(self, request):
-        form = VisitorFilterForm(request.args)
+        form = VisitFilterForm(request.args)
         if not form.validate():
             return json(form.errors, 400)
 
@@ -76,12 +88,12 @@ class VisitorListView(HTTPMethodView):
             form.filter_by.data
         )
         query = (
-            Visitor.query
-            .where(Visitor.date >= start_date)
-            .where(Visitor.date <= end_date)
-            .where(Visitor.account_id == user.id)
+            Visit.query
+            .where(Visit.date >= start_date)
+            .where(Visit.date <= end_date)
+            .where(Visit.account_id == user.id)
         )
-        visitors = await (
+        visits = await (
             query
             .offset(form.offset.data * form.limit.data)
             .limit(form.limit.data)
@@ -91,7 +103,7 @@ class VisitorListView(HTTPMethodView):
         total = await db.alias(query, 'cnt').count().gino.scalar()
         return json(
             {
-                'data': (v.to_dict() for v in visitors),
+                'data': (v.to_dict() for v in visits),
                 'total': total,
             },
             status=200,

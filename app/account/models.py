@@ -23,6 +23,9 @@ class User(db.Model):
     password = db.Column(db.Unicode(1000))
     timezone = db.Column(db.Unicode(128))
 
+    def __repr__(self):
+        return f'User(domain={self.domain}, email={self.email}, api_key={self.api_key})'
+
     def verify_password(self, password):
         return pbkdf2_sha512.verify(password, self.password)
 

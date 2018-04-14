@@ -1,11 +1,11 @@
-from datetime import date, datetime
+from datetime import datetime
 from uuid import UUID, uuid4
 
 import pytest
 import pytz
 
 from app.conf import settings
-from app.visitor.models import Visitor
+from app.visit.models import Visit
 
 pytestmark = pytest.mark.asyncio
 
@@ -72,13 +72,16 @@ async def test_2hits(client, user):
     assert response.status == 200
     assert response.cookies.get(settings.VISITOR_COOKIE_NAME) is None
 
-    visitor = await Visitor.query.gino.first()
-    assert visitor.cookie == UUID(cookie.value)
-    assert visitor.account_id == user.id
+    visits = await Visit.query.gino.all()
+    assert len(visits) == 2
+    assert all([visit.cookie == UUID(cookie.value) for visit in visits])
+    assert all([visit.account_id == user.id for visit in visits])
     tz = pytz.timezone(user.timezone)
-    assert visitor.date == datetime.now(tz=tz).date()
-    assert visitor.path == '/about/'
-    assert visitor.hits == 2
+    assert all([
+        visit.date.replace(microsecond=0) == datetime.now(tz=tz).replace(microsecond=0)
+        for visit in visits
+    ])
+    assert all([visit.path == '/about/' for visit in visits])
 
 
 async def test_hit_without_trailing_slash(client, user):
@@ -86,9 +89,9 @@ async def test_hit_without_trailing_slash(client, user):
         'Referer': f'http://{user.domain}',
     })
     assert response.status == 200
-    visitor = await Visitor.query.gino.first()
-    assert visitor.path == '/'
-    assert visitor.hits == 1
+    visits = await Visit.query.gino.all()
+    assert len(visits) == 1
+    assert visits[0].path == '/'
 
 
 async def test_hit_querystring(client, user):
@@ -96,29 +99,28 @@ async def test_hit_querystring(client, user):
         'Referer': f'http://{user.domain}?param=value',
     })
     assert response.status == 200
-    visitor = await Visitor.query.gino.first()
-    assert visitor.path == '/'
-    assert visitor.hits == 1
+    visits = await Visit.query.gino.all()
+    assert len(visits) == 1
+    assert visits[0].path == '/'
 
 
-async def test_visitors_list(client, user, login):
-    now = date(2018, 2, 23)
-    yesterday = date(2018, 2, 22)
-    v2 = await Visitor.create(
+async def test_visits_list(client, user, login):
+    now = datetime(2018, 2, 23)
+    yesterday = datetime(2018, 2, 22)
+    v2 = await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=uuid4(),
-        hits=2,
     )
-    v1 = await Visitor.create(
+    v1 = await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4(),
     )
     await login(user)
-    response = await client.get('/api/visitors/', params={
+    response = await client.get('/api/visits/', params={
         'filter_by': 'month',
         'date': now.strftime('%Y-%m-%d'),
         'offset': 0,

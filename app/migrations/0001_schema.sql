@@ -2,7 +2,7 @@
 -- Account
 --
 
-create table if not exists account (
+create table account (
     api_key         uuid            unique      not null,
     domain          varchar(100)    not null,
     email           varchar(100)    not null,

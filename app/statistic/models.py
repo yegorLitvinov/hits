@@ -10,7 +10,7 @@ async def fetch(query, *args):
 
 async def hits(account_id, start_date, end_date):
     query = """
-    select coalesce(sum(hits), 0) as _sum from visitor
+    select count(*) as _sum from visit
     where account_id = $1 and date >= $2 and date <= $3
     """
     res = await fetch(query, account_id, start_date, end_date)
@@ -20,7 +20,7 @@ async def hits(account_id, start_date, end_date):
 async def visits(account_id, start_date, end_date):
     query = """
     select count(*) as _count from (
-        select distinct cookie from visitor
+        select distinct cookie from visit
         where account_id = $1 and date >= $2 and date <= $3
     ) as cookies
     """
@@ -31,9 +31,9 @@ async def visits(account_id, start_date, end_date):
 async def new_visits(account_id, start_date, end_date):
     query = """
     select count(*) as _count from (
-        select distinct cookie from visitor
+        select distinct cookie from visit
         where cookie not in (
-            select distinct cookie from visitor
+            select distinct cookie from visit
             where account_id = $1 and date < $2
         ) and account_id = $1 and date >= $2 and date <= $3
     ) as cookies
@@ -45,7 +45,7 @@ async def new_visits(account_id, start_date, end_date):
 async def paths(account_id, start_date, end_date):
     # TODO: group by index
     query = """
-    select sum(hits) as _sum, path from visitor
+    select count(*) as _sum, path from visit
     where account_id = $1 and date >= $2 and date <= $3
     group by path
     order by _sum desc

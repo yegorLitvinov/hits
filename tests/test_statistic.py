@@ -1,37 +1,37 @@
-from datetime import date
+from datetime import datetime
 from uuid import uuid4
 
 import pytest
 
 from app.core.utils import get_start_end_dates
 from app.statistic.models import hits, new_visits, paths, visits
-from app.visitor.models import Visitor
+from app.visit.models import Visit
 
 pytestmark = pytest.mark.asyncio
 
 
 async def test_hits(user, admin):
-    now = date(2018, 2, 23)
-    yesterday = date(2018, 2, 22)
-    await Visitor.create(
+    now = datetime(2018, 2, 23)
+    yesterday = datetime(2018, 2, 22)
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4()
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=uuid4()
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/two',
         date=now,
         cookie=uuid4()
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=admin.id,
         path='/three',
         date=now,
@@ -50,35 +50,35 @@ async def test_hits(user, admin):
 
 
 async def test_visits(user, admin):
-    now = date(2018, 2, 23)
-    yesterday = date(2018, 2, 22)
+    now = datetime(2018, 2, 23)
+    yesterday = datetime(2018, 2, 22)
     cookie1 = uuid4()
     cookie2 = uuid4()
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=cookie2,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=cookie1,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/two',
         date=now,
         cookie=cookie1,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=admin.id,
         path='/three',
         date=now,
         cookie=cookie1,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=admin.id,
         path='/one',
         date=now,
@@ -97,22 +97,22 @@ async def test_visits(user, admin):
 
 
 async def test_new_visits(user):
-    now = date(2018, 2, 23)
-    yesterday = date(2018, 2, 22)
-    last_month = date(2018, 1, 14)
-    await Visitor.create(
+    now = datetime(2018, 2, 23)
+    yesterday = datetime(2018, 2, 22)
+    last_month = datetime(2018, 1, 14)
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4(),
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=uuid4(),
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/two',
         date=last_month,
@@ -125,41 +125,41 @@ async def test_new_visits(user):
 
 
 async def test_paths(user, admin):
-    now = date(2018, 2, 23)
-    yesterday = date(2018, 2, 22)
+    now = datetime(2018, 2, 23)
+    yesterday = datetime(2018, 2, 22)
     cookie1 = uuid4()
     cookie2 = uuid4()
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=cookie2,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=cookie1,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/one',
         date=now,
         cookie=cookie2,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/two',
         date=now,
         cookie=cookie1,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/two',
         date=now,
         cookie=cookie2,
     )
-    await Visitor.create(
+    await Visit.create(
         account_id=user.id,
         path='/three',
         date=yesterday,

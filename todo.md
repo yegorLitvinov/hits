@@ -15,11 +15,12 @@
 - [x] fix timezone now bug (look at pendulum)
 - [x] new visitors
 - [x] use orm
+- [x] rename visitor -> visit, only one record for visit
 - [ ] latest visitor browser and ip
-- [ ] average visitors (smart statistic)
+- [ ] browser statistics with python-user-agents
+- [ ] average visits (smart statistic)
 - [ ] test sql injection
 - [ ] explain analize
-- [ ] rename visitor -> visit, only one record for visit
 - [ ] remove check-auth
 - [ ] migrations table
 - [ ] gino sanic config

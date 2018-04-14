@@ -103,7 +103,7 @@ async def db(sql_dir, reuse_db, event_loop):
 # FIXME: db implicitly used in all tests
 @pytest.fixture(autouse=True)
 async def cleanup_db(db, db_conn):
-    await db_conn.execute('delete from visitor')
+    await db_conn.execute('delete from visit')
     await db_conn.execute('delete from account')
 
 
