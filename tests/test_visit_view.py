@@ -1,4 +1,5 @@
 from datetime import datetime
+from ipaddress import IPv4Address
 from uuid import UUID, uuid4
 
 import pytest
@@ -132,6 +133,7 @@ async def test_hit_querystring(client, user):
 
 
 async def test_visits_list(client, user, login):
+    ua = UserAgent()
     now = datetime(2018, 2, 23)
     yesterday = datetime(2018, 2, 22)
     v2 = await Visit.create(
@@ -139,12 +141,16 @@ async def test_visits_list(client, user, login):
         path='/one',
         date=now,
         cookie=uuid4(),
+        ip=IPv4Address('172.19.0.1'),
+        user_agent=ua.random,
     )
     v1 = await Visit.create(
         account_id=user.id,
         path='/one',
         date=yesterday,
         cookie=uuid4(),
+        ip=IPv4Address('127.0.0.1'),
+        user_agent=ua.random,
     )
     await login(user)
     response = await client.get('/api/visits/', params={

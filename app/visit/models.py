@@ -21,4 +21,5 @@ class Visit(db.Model):
         d = super().to_dict()
         d['cookie'] = str(d.pop('cookie'))
         d['date'] = d.pop('date').isoformat()
+        d['ip'] = str(d.pop('ip'))
         return d
