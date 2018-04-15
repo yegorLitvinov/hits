@@ -5,6 +5,7 @@ import wtforms
 from sanic import Blueprint
 from sanic.request import Request
 from sanic.response import json
+from sanic.views import HTTPMethodView
 from wtforms import validators
 
 from app.conf import settings
@@ -64,12 +65,6 @@ async def login(request):
     return response
 
 
-@blueprint.route('/check-auth/', methods=['POST'])
-@auth_required
-async def check_auth(request):
-    return json({})
-
-
 @blueprint.route('/logout/', methods=['POST'])
 @auth_required
 async def logout(request):
@@ -84,12 +79,16 @@ class ProfileForm(wtforms.Form):
     )
 
 
-@blueprint.route('/profile/', methods=['PATCH'])
-@auth_required
-async def profile(request):
-    form = ProfileForm.from_json(request.json)
-    if not form.validate():
-        return json(form.errors, 400)
-    user = request['user']
-    await user.update(**form.data).apply()
-    return json(user.to_dict(), 200)
+class ProfileView(HTTPMethodView):
+    @auth_required
+    async def get(self, request):
+        return json(request['user'].to_dict(), 200)
+
+    @auth_required
+    async def patch(self, request):
+        form = ProfileForm.from_json(request.json)
+        if not form.validate():
+            return json(form.errors, 400)
+        user = request['user']
+        await user.update(**form.data).apply()
+        return json(user.to_dict(), 200)

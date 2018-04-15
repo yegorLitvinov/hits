@@ -45,11 +45,11 @@ async def test_login_wrong_credentials(db, client):
 
 
 async def test_unauthorized(client):
-    response = await client.post('/api/account/check-auth/')
+    response = await client.get('/api/account/profile/')
     assert response.status == 401
     cookies = SimpleCookie()
     cookies[settings.SESSION_COOKIE_NAME] = str(uuid4())
-    response = await client.post('/api/account/check-auth/')
+    response = await client.get('/api/account/profile/')
     assert response.status == 401
 
 
@@ -67,7 +67,9 @@ async def test_login_success(client, user):
     resp_data = await response.json()
     assert resp_data == user.to_dict()
 
-    response = await client.post('/api/account/check-auth/')
+    response = await client.get('/api/account/profile/')
+    resp_data = await response.json()
+    assert resp_data == user.to_dict()
     assert response.status == 200
 
 

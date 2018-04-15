@@ -20,12 +20,14 @@
 - [x] browser info with python-user-agents
 - [x] ~~ test sql injection ~~ orm used
 - [x] migrations table
+- [x] ~~ zombodb ~~ huge memory usage
+- [x] remove check-auth
 - [ ] average visits (smart statistic)
 - [ ] explain analize
-- [ ] remove check-auth
 - [ ] gino sanic config
 - [ ] remove get_db_pool
-- [ ] zombodb
+- [ ] ip geograpy
+- [ ] setup.cfg
 
 ## Frontend
 - [x] login
