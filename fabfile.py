@@ -85,6 +85,7 @@ pg = tasks.ImageBuildDockerTasks(
             network='metric',
             ip='172.19.0.3',
             volume=f'/home/{user}/pgdata:/var/lib/postgresql/data',
+            restart='always',
         )
     ),
     registry='localhost:5000',
@@ -103,6 +104,7 @@ redis = tasks.DockerTasks(
             network='metric',
             ip='172.19.0.4',
             volume=f'/home/{user}/redisdata:/data',
+            restart='always',
         )
     ),
     registry='localhost:5000',
@@ -117,7 +119,8 @@ app = tasks.ImageBuildDockerTasks(
         image='metric_app',
         options=dict(
             network='metric',
-            ip='172.19.0.2'
+            ip='172.19.0.2',
+            restart='always',
         ),
     ),
     ssh_tunnel='5000:5000',
