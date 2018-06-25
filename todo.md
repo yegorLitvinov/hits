@@ -28,6 +28,7 @@
 - [ ] remove get_db_pool
 - [ ] ip geograpy
 - [ ] setup.cfg
+- [ ] fix stat does not counts from 23:00 to 00:00
 
 ## Frontend
 - [x] login

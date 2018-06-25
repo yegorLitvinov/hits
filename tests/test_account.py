@@ -1,4 +1,5 @@
 import pytest
+from asyncpg.exceptions import DataError
 
 from app.account.models import User, encrypt_password
 
@@ -7,7 +8,7 @@ pytestmark = pytest.mark.asyncio
 
 async def test_get_by_id(user, admin):
     assert (await User.get(user.id)).id == user.id
-    with pytest.raises(TypeError) as error:
+    with pytest.raises(DataError) as error:
         await User.get('dfdf')
     assert 'an integer is required' in str(error)
     assert await User.get(-1) is None

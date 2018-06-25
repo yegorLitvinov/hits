@@ -35,7 +35,7 @@ isort:
 flake:
 	@flake8 app test locustfile.py
 
-precommit: flake isort create-req
+precommit: flake isort req
 
 cleanup:
 	find . -name \*.pyc | xargs rm -fv
@@ -44,7 +44,7 @@ cleanup:
 	find . -name .mypy_cache | xargs rm -rfv
 	find . -name .pytest_cache | xargs rm -rfv
 
-create-req:
+req:
 	pipenv lock -r > app/requirements/prod.txt
 	pipenv lock -rd > app/requirements/dev.txt
 	sort app/requirements/prod.txt -o app/requirements/prod.txt

@@ -1,4 +1,4 @@
-aiocontextvars==0.1.2; python_version < '3.7'
+aiocontextvars==0.1.2; python_version < "3.7"
 aiofiles==0.3.2
 aioredis==1.1.0
 asyncpg==0.16.0
@@ -14,7 +14,7 @@ ipython-genutils==0.2.0
 jedi==0.12.0
 parso==0.2.1
 passlib==1.7.1
-pexpect==4.6.0; sys_platform != 'win32'
+pexpect==4.6.0; sys_platform != "win32"
 pickleshare==0.7.4
 prompt-toolkit==1.0.15
 ptyprocess==0.6.0

@@ -14,8 +14,7 @@ from app.connections.db import get_db
 from app.migrations.migrate import migrate
 from app.routes import add_routes
 
-TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
-settings.DSN_KWARGS['database'] = TEST_DBNAME
+TEST_DBNAME = settings.DSN_KWARGS['database']
 
 
 def pytest_addoption(parser):
