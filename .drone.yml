@@ -33,7 +33,7 @@ pipeline:
     repo: yegorlitvinov/metric-back
     secrets: [ docker_username, docker_password ]
     tags: latest
-    file: app/Dockerfile
+    dockerfile: app/Dockerfile
 
   deploy:
     image: appleboy/drone-ssh

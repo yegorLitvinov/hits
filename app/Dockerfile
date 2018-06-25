@@ -1,10 +1,8 @@
-FROM python:3.6-alpine
+FROM python:3.6
 ENV USER metric
 ENV PROJECT_DIR /home/$USER
-RUN mkdir -p $PROJECT_DIR
-RUN adduser -u 1010 -h $PROJECT_DIR -D -s /bin/sh $USER
+RUN adduser --uid 1010 --home --disabled-password $PROJECT_DIR $USER
 
-RUN apk add --update --no-cache build-base
 WORKDIR $PROJECT_DIR
 ADD ./requirements/prod.txt ./
 USER $USER
