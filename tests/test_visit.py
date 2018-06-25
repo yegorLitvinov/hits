@@ -42,13 +42,12 @@ async def test_serialize_user_agent():
     }
 
 
-async def test_save_many_random_user_agents(user):
+async def test_create_visit_with_random_ua(user):
     ua = UserAgent()
-    for i in range(10):
-        await Visit.create(
-            user_agent=serialize_user_agent(parse(ua.random)),
-            account_id=user.id,
-            path='/',
-            cookie=uuid4(),
-            date=datetime.now(),
-        )
+    await Visit.create(
+        user_agent=serialize_user_agent(parse(ua.random)),
+        account_id=user.id,
+        path='/',
+        cookie=uuid4(),
+        date=datetime.now(),
+    )

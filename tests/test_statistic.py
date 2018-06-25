@@ -166,10 +166,9 @@ async def test_paths(user, admin):
         cookie=cookie1,
     )
     _, paths_stat = await paths(user.id, *get_start_end_dates(now.date(), 'day'))
-    assert paths_stat == [
-        dict(path='/one', _sum=2),
-        dict(path='/two', _sum=2),
-    ]
+    for stat in paths_stat:
+        assert stat['path'] in ['/one', '/two']
+        assert stat['_sum'] == 2
     _, paths_stat = await paths(user.id, *get_start_end_dates(now.date(), 'month'))
     assert paths_stat == [
         dict(path='/one', _sum=3),
