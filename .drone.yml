@@ -33,6 +33,7 @@ pipeline:
     repo: yegorlitvinov/metric-back
     secrets: [ docker_username, docker_password ]
     tags: latest
+    context: app
     dockerfile: app/Dockerfile
 
   deploy:
@@ -42,9 +43,11 @@ pipeline:
     port: 22
     secrets: [ ssh_password ]
     script:
+      - cd metric
       - git pull -f
-      - cd metric && docker-compose pull
-      - cd metric && docker-compose up -d
+      - ls -lah
+      - docker-compose pull
+      - docker-compose up -d
 
 services:
   pg:
