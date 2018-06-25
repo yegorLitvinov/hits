@@ -176,3 +176,33 @@ async def test_paths(user, admin):
         dict(path='/two', _sum=2),
         dict(path='/three', _sum=1),
     ]
+
+
+async def test_last_day_of_month(user):
+    now = datetime(2018, 6, 30, 12, 30)
+    cookie = uuid4()
+    await Visit.create(
+        account_id=user.id,
+        path='/one',
+        date=now,
+        cookie=cookie,
+    )
+    _, paths_stat = await paths(user.id, *get_start_end_dates(now.date(), 'month'))
+    assert paths_stat == [
+        dict(path='/one', _sum=1),
+    ]
+
+
+async def test_last_day_of_year(user):
+    now = datetime(2018, 12, 31, 12, 30)
+    cookie = uuid4()
+    await Visit.create(
+        account_id=user.id,
+        path='/one',
+        date=now,
+        cookie=cookie,
+    )
+    _, paths_stat = await paths(user.id, *get_start_end_dates(now.date(), 'year'))
+    assert paths_stat == [
+        dict(path='/one', _sum=1),
+    ]
