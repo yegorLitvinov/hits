@@ -44,8 +44,8 @@ pipeline:
     secrets: [ ssh_password ]
     script:
       - cd metric
-      - git pull -f
-      - ls -lah
+      - git fetch
+      - git reset --hard origin/master
       - docker-compose pull
       - docker-compose up -d
 
