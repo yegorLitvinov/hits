@@ -8,7 +8,7 @@ pipeline:
     mount:
       - ./.venv
     volumes:
-      - /tmp/cache:/cache
+      - /tmp/metric_cache:/cache
 
   build:
     image: python:3.6
@@ -24,13 +24,13 @@ pipeline:
     image: drillster/drone-volume-cache
     rebuild: true
     mount:
-      - ./venv
+      - ./.venv
     volumes:
-      - /tmp/cache:/cache
+      - /tmp/metric_cache:/cache
 
   publish:
     image: plugins/docker
-    repo: yegorLitvinov/metric-back
+    repo: yegorlitvinov/metric-back
     secrets: [ docker_username, docker_password ]
     tags: latest
     file: app/Dockerfile
@@ -42,9 +42,9 @@ pipeline:
     port: 22
     secrets: [ ssh_password ]
     script:
-      - git pull
-      - docker-compose pull
-      - docker-compose up -d
+      - git pull -f
+      - cd metric && docker-compose pull
+      - cd metric && docker-compose up -d
 
 services:
   pg:
