@@ -80,7 +80,10 @@ async def test_2hits(client, user):
     assert all([visit.account_id == user.id for visit in visits])
     tz = pytz.timezone(user.timezone)
     assert all([
-        visit.date.replace(microsecond=0) == datetime.now(tz=tz).replace(microsecond=0)
+        (
+            visit.date.replace(second=0, microsecond=0) ==
+            datetime.now(tz=tz).replace(second=0, microsecond=0)
+        )
         for visit in visits
     ])
     assert all([visit.path == '/about/' for visit in visits])
