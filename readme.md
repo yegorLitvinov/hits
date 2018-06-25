@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/yegorLitvinov/metric.svg?branch=master)](https://travis-ci.org/yegorLitvinov/metric)
+[![Build Status](https://drone.tvgun.ga/api/badges/yegorLitvinov/metric/status.svg)](https://drone.tvgun.ga/yegorLitvinov/metric)
 
 ## Simple asyncio hits and visits counter
 
@@ -13,20 +13,3 @@
 >
 ```
 3. Watch visit statistics at [http://metr.tvgun.ga](http://metr.tvgun.ga)
-
-### Prepare server
-```bash
-fab install_docker
-fab create_docker_network
-fab user_add
-fab install_certificates
-```
-
-### Deploy
-```bash
-fab copy_front
-fab copy_nginx
-fab metric_pg
-fab metric_redis
-fab metric_app
-```

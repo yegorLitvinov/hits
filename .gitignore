@@ -4,6 +4,7 @@ __pycache__
 *.pyc
 .mypy_cache
 .pytest_cache
+.venv/
 
 # Editor
 /.vscode
@@ -11,6 +12,11 @@ __pycache__
 # Tests
 /htmlcov/
 /.coverage
+
+# Docker
+/redisdata/
+/pgdata/
+/appdata/
 
 /backup/
 yarn-error.log

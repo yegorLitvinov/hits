@@ -16,7 +16,6 @@ from app.routes import add_routes
 
 TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
 settings.DSN_KWARGS['database'] = TEST_DBNAME
-settings.REDIS_ADDR = 'redis://localhost/15'
 
 
 def pytest_addoption(parser):

@@ -30,10 +30,10 @@ migrate:
 resetdb: dropdb createdb
 
 isort:
-	@isort -rc app tests locustfile.py fabfile.py
+	@isort -rc app tests locustfile.py
 
 flake:
-	@flake8 app test locustfile.py fabfile.py
+	@flake8 app test locustfile.py
 
 precommit: flake isort create-req
 
@@ -63,11 +63,6 @@ restore:
 test-cov:
 	py.test --cov=app --cov-config .coveragerc --cov-report html:htmlcov
 
-deploy-app:
-	make cleanup
-	fab app
-
 deploy-front:
 	cd front && yarn && yarn run build
 	rm -f front/dist/static/js/*.map
-	@fab copy_front

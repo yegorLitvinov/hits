@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 sanic = "*"
 asyncpg = "*"
 ipython = "*"
@@ -19,18 +16,16 @@ sqlalchemy-utils = "*"
 gino = "*"
 user-agents = "*"
 
-
 [dev-packages]
-
 "flake8" = "*"
 isort = "*"
 aoiklivereload = "*"
 pytest = "*"
 pdbpp = "*"
-fabricio = "*"
 pytest-cov = "*"
 pytest-asyncio = "*"
 pytest-sanic = "*"
 locustio = "*"
 "autopep8" = "*"
 fake-useragent = "*"
+pluggy = "*"

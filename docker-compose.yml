@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+
+  app:
+    build: app
+    restart: always
+    networks:
+      metricNetwork:
+        ipv4_address: 172.19.0.2
+    depends_on:
+      - pg
+      - redis
+
+  pg:
+    build: pg
+    restart: always
+    networks:
+      metricNetwork:
+        ipv4_address: 172.19.0.3
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      metricNetwork:
+        ipv4_address: 172.19.0.4
+    volumes:
+      - ./redisdata:/data
+    command: --appendonly yes
+
+networks:
+  metricNetwork:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.0.0/24
