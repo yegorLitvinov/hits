@@ -8,4 +8,5 @@ DSN_KWARGS = dict(
     port=5432
 )
 
-REDIS_ADDR = 'redis://redis/1'
+REDIS_ADDR = 'redis://redis'
+REDIS_DB = 1

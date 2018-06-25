@@ -40,7 +40,6 @@ pygments==2.2.0
 pytest==3.6.2
 pytest-asyncio==0.8.0
 pytest-cov==2.5.1
-pytest-env==0.6.2
 pytest-sanic==0.1.12
 pyyaml==3.12
 pyzmq==17.0.0
@@ -49,7 +48,7 @@ sanic==0.7.0
 six==1.11.0
 ujson==1.35
 urllib3==1.23
-uvloop==0.10.1
+uvloop==0.10.2
 watchdog==0.8.3
 websockets==5.0.1
 werkzeug==0.14.1

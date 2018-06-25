@@ -14,7 +14,9 @@ from app.connections.db import get_db
 from app.migrations.migrate import migrate
 from app.routes import add_routes
 
-TEST_DBNAME = settings.DSN_KWARGS['database']
+TEST_DBNAME = settings.DSN_KWARGS['database'] + '_test'
+settings.DSN_KWARGS['database'] = TEST_DBNAME
+settings.REDIS_DB = 15
 
 
 def pytest_addoption(parser):
@@ -45,7 +47,9 @@ async def db_conn(event_loop):
 
 @pytest.fixture(scope='session')
 async def redis_conn(event_loop):
-    redis_conn = await aioredis.create_connection(settings.REDIS_ADDR)
+    redis_conn = await aioredis.create_connection(
+        f'{settings.REDIS_ADDR}/{settings.REDIS_DB}'
+    )
     yield redis_conn
     redis_conn.close()
     await redis_conn.wait_closed()

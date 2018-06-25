@@ -15,7 +15,8 @@ DSN_KWARGS = dict(
 # app.config.DB_POOL_MAX_SIZE = 10
 # app.config.DB_USE_CONNECTION_FOR_REQUEST = True
 
-REDIS_ADDR = 'redis://localhost/1'
+REDIS_ADDR = 'redis://localhost'
+REDIS_DB = 1
 
 VISITOR_COOKIE_NAME = '_visitor'
 VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 2
